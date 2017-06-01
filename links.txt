@@ -71,6 +71,11 @@ ZFS: To Dedupe or not to Dedupe...
 Submitted by constant on Wed, 2011-07-27 16:26
 http://constantin.glez.de/blog/2011/07/zfs-dedupe-or-not-dedupe
 
+ZFS Raidz Performance, Capacity and Integrity
+comparing speed, space and safety per raidz type
+Great details of raidz levels, testing, and such.
+https://calomel.org/zfs_raid_speed_capacity.html
+
 ZFSOnLinux (ZoL)
 The native Linux kernel port of the ZFS filesystem.  To get started with ZFS
 on Linux simply download the latest release and install using the directions
