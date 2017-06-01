@@ -1,0 +1,60 @@
+deduplication.txt
+Created Tue Sep 10 12:37:06 AKDT 2013
+Copyright (C) 2013 by Raymond E. Marcil <marcilr@gmail.com>
+
+
+Deduplication
+
+
+Data deduplication capabilities were added to the ZFS source repository
+at the end of October 2009,[56] and relevant OpenSolaris ZFS development
+packages have been available since December 3, 2009 (build 128).
+
+Effective use of deduplication may require large RAM capacity.
+Recommendations range from 1 GB for every extra 1 TB of storage[57]
+to 2 GB for every TB of storage.[58][59]  Insufficient physical memory
+or lack of ZFS cache can result in virtual memory thrashing, which can
+either lower performance, or result in complete memory starvation.
+[citation needed]  Solid-state drives (SSDs) can be used to cache
+deduplication tables, thereby speeding up deduplication performance.
+[citation needed]
+
+Other storage vendors use modified versions of ZFS to achieve very high
+compression ratios.  Two examples in 2012 were GreenBytes[60] and
+Tegile.[61]
+wikipedia.org/
+
+
+Links
+=====
+[56] ^ "ZFS Deduplication"
+https://blogs.oracle.com/bonwick/entry/zfs_dedup
+
+[57] ^ Gary Sims (4). "Building ZFS Based Network Attached Storage Using
+FreeNAS 8" (Blog). TrainSignal Training. TrainSignal, Inc. Retrieved
+9 June 2012.
+http://www.trainsignal.com/blog/zfs-nas-setup-guide
+
+[58] ^ Ray Van Dolson (May 2011). "[zfs-discuss] Summary: Deduplication Memory
+Requirements". zfs-discuss mailing list.
+http://mail.opensolaris.org/pipermail/zfs-discuss/2011-May/048159.html
+
+[59] ^ "ZFSTuningGuide".
+http://wiki.freebsd.org/ZFSTuningGuide#Deduplication
+
+[60] ^ Chris Mellor (October 12, 2012). "GreenBytes brandishes full-fat clone
+VDI pumper". The Register. Retrieved August 29, 2013.
+http://www.theregister.co.uk/2012/10/12/greenbytes_chairman/
+
+[61] ^ Chris Mellor (June 1, 2012). "Newcomer gets out its box, plans to sell
+it cheaply to all comers". The Register. Retrieved August 29, 2013.
+http://www.theregister.co.uk/2012/06/01/tegile_zebi/
+
+2.13 Deduplication
+ZFS
+From Wikipedia, the free encyclopedia
+http://en.wikipedia.org/wiki/ZFS#Deduplication
+
+ZFS
+From Wikipedia, the free encyclopedia
+http://en.wikipedia.org/wiki/ZFS
