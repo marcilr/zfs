@@ -23,6 +23,9 @@ links.txt
 packages.txt
   ZFS related packages
 
+pics/
+  Pictures
+
 raid-z/
   ZFS redundant disk
 
