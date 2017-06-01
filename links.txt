@@ -43,6 +43,9 @@ Great detail on deduplication theory here.
 Solid info on byte-level, block-level, and file-level.
 https://blogs.oracle.com/bonwick/entry/zfs_dedup
 
+ZFS on linux
+http://zfsonlinux.org/faq.html
+
 ZFS FAQ
 http://zfsonlinux.org/faq.html
 
