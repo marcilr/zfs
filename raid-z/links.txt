@@ -1,0 +1,19 @@
+links.txt
+Created Thu Jun  1 13:10:13 AKDT 2017
+Copyright (C) 2017 by Raymond E. Marcil <marcilr@gmail.com>
+
+
+RAID-Z related links
+
+
+Links
+=====
+The Z File System (ZFS)
+Quick Start Guide
+https://www.freebsd.org/doc/handbook/zfs-quickstart.html
+
+ZFS Raidz Performance, Capacity and Integrity
+comparing speed, space and safety per raidz type
+Truly great RAID-Z details here
+https://calomel.org/zfs_raid_speed_capacity.html
+
