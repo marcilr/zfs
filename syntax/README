@@ -5,6 +5,15 @@ Copyright (C) 2015 by Raymond E. Marcil <marcilr@gmail.com>
 
 Filelist
 ========
+mount.txt
+  Mount zfs partition
+
+syntax.txt
+  Syntax
+
+zfs-export-inport.txt
+  Exporting Storage Pools
+
 zpool.txt
   zpool - configures ZFS storage pool
 
