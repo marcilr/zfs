@@ -1,0 +1,173 @@
+INSTALL
+Created Mon Jul 20 18:20:51 AKDT 2015
+Copyright (C) 2015 by Raymond E. Marcil <marcilr@gmail.com>
+
+
+Installation of zfs on debian jessie 8.1 amd64
+
+
+1. Install zfs-fuse - ZFS on FUSE package:
+# aptitude install zfs-fuse
+
+2. Create zpool /dev/disk/by-id/ on 8TB Seagate ST8000AS0002, s/n: Z8404JEE
+# ln -s /dev/sdb4 /dev/sata-Seagate-8TB-ST8000AS0002-Z8404JEE
+# zpool create tank sata-Seagate-8TB-ST8000AS0002-Z8404JEE
+Defaulting to 4K blocksize (ashift=12) for '/dev/sata-Seagate-8TB-ST8000AS0002-Z8404JEE'
+#
+
+In this way the pool can be easily migrated to the /dev/sdb4 changes due to new device or whatever.
+
+blkid now shows the partition as zfs with UUID:
+
+# blkid
+/dev/sda1: UUID="108b9e50-6228-485b-9f21-24b3951fc9a8" TYPE="ext4" \
+  PARTLABEL="malachite" PARTUUID="5ee04fcd-dc50-403d-b427-c276adde498f"
+/dev/sdb1: UUID="137ba80d-bd1f-4948-89e5-95b6bde40658" TYPE="ext4" \
+  PARTLABEL="primary" PARTUUID="4ed27d64-91d7-4fd1-8fd6-db7637877e10"
+/dev/sdb2: UUID="1f6bf3ee-2125-410c-8ad4-8ce66a38f768" TYPE="ext4" \
+  PARTLABEL="primary" PARTUUID="3de3c642-05f4-455f-90a1-b93e05d9a6a4"
+/dev/sdb3: UUID="16aaebd0-3095-4abe-a090-c38442909487" TYPE="ext4" \
+  PARTLABEL="primary" PARTUUID="da33d42b-8017-41fc-b430-b969003e2bff"
+/dev/sdb4: LABEL="tank" UUID="3868511115667148380" UUID_SUB="10446896053805012826" \
+  TYPE="zfs_member" PARTLABEL="primary" PARTUUID="aed3f827-a500-488e-8371-8ee8b7f00621"
+
+Parted shows does not show zfs:
+
+# parted -l
+...
+Disk /dev/sdb: 8002GB
+Sector size (logical/physical): 512B/4096B
+Partition Table: gpt
+Disk Flags: 
+
+Number  Start   End     Size    File system  Name     Flags
+ 1      1049kB  100GB   100GB   ext4         primary  boot, esp
+ 2      100GB   200GB   100GB   ext4         primary  boot, esp
+ 3      200GB   300GB   100GB   ext4         primary  boot, esp
+ 4      300GB   8002GB  7702GB               primary
+
+
+#
+
+Mount shows it:
+$ mount | grep zfs
+kstat on /zfs-kstat type fuse (rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other)
+tank on /tank type fuse.zfs (rw,relatime,user_id=0,group_id=0,default_permissions,allow_other)
+$
+
+
+3. Automatic Start
+For ZFS to live by its "zero administration" namesake, the zfs daemon must be loaded at startup.
+A benefit to this is that it is not necessary to mount the zpool in /etc/fstab; the zfs daemon
+can import and mount zfs pools automatically. 
+archlinux.org/
+
+Noticed that the zfs-fuse installed /etc/init.d/zfs-fuse start/stop script that indeed starts
+the /sbin/zfs-fuse daemon.
+
+4. Create a storage pool
+List drives:
+# parted --list
+
+Having identified list of drives, it is now time to get the id's of the drives to add to the zpool.
+NOTE: Previously I created 7.7TB /dev/sdb4 on 8TB Seagate ST8000AS0002 sata drive.
+
+To find the id's, simply:
+# ls -lh /dev/disk/by-id/
+...
+lrwxrwxrwx 1 root root  9 Jul 20 18:56 ata-ST8000AS0002-1NA17Z_Z8404JEE -> ../../sdb
+lrwxrwxrwx 1 root root 10 Jul 20 18:56 ata-ST8000AS0002-1NA17Z_Z8404JEE-part1 -> ../../sdb1
+lrwxrwxrwx 1 root root 10 Jul 20 18:56 ata-ST8000AS0002-1NA17Z_Z8404JEE-part2 -> ../../sdb2
+lrwxrwxrwx 1 root root 10 Jul 20 18:56 ata-ST8000AS0002-1NA17Z_Z8404JEE-part3 -> ../../sdb3
+lrwxrwxrwx 1 root root 10 Jul 20 18:56 ata-ST8000AS0002-1NA17Z_Z8404JEE-part4 -> ../../sdb4    <=== This is it.
+...
+#
+
+Drives partitioned with GPT have labels and UUID that look like this.
+# ls -l /dev/disk/by-partlabel
+# lrwxrwxrwx 1 root root 10 Apr 30 01:44 zfsdata1 -> ../../sdd1
+# lrwxrwxrwx 1 root root 10 Apr 30 01:44 zfsdata2 -> ../../sdc1
+# lrwxrwxrwx 1 root root 10 Apr 30 01:59 zfsl2arc -> ../../sda1
+
+# ls -l /dev/disk/by-partuuid
+# lrwxrwxrwx 1 root root 10 Apr 30 01:44 148c462c-7819-431a-9aba-5bf42bb5a34e -> ../../sdd1
+# lrwxrwxrwx 1 root root 10 Apr 30 01:59 4f95da30-b2fb-412b-9090-fc349993df56 -> ../../sda1
+# lrwxrwxrwx 1 root root 10 Apr 30 01:44 e5ccef58-5adf-4094-81a7-3bac846a885f -> ../../sdc1
+
+
+Create mount point:
+# mkdir /usr/local/backups
+# chown root:users /usr/local/backups
+# chmod 775 /usr/local/backups
+# chmod g+ws /usr/local/backups
+
+
+Now, finally, create the ZFS pool:
+# zpool create -f -m <mount> <pool> raidz <ids>
+# zpool create -f -m /usr/local/backups backups /dev/disk/by-id/ata-ST8000AS0002-1NA17Z_Z8404JEE-part4
+Defaulting to 4K blocksize (ashift=12) for '/dev/disk/by-id/ata-ST8000AS0002-1NA17Z_Z8404JEE-part4'
+#
+
+Easy peasy.
+
+5. Enable deduplication:
+# zfs set dedup=on backups
+
+That's it.
+
+pthree.org/2012/12/18/zfs-administration-part-xi-compression-and-deduplication/
+
+
+
+6. Check that /dev/disk/by-id/ata-ST8000AS0002-1NA17Z_Z8404JEE-part4 (7.7TB /dev/sdb4) got mounted:
+Kernel mounted new zfs /dev/sdb4 partition to /usr/local/backups:
+
+# mount | grep zfs
+kstat on /zfs-kstat type fuse (rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other)
+backups on /usr/local/backups type fuse.zfs (rw,relatime,user_id=0,group_id=0,default_permissions,allow_other)
+#
+
+$ df -h | grep backups
+sshfs@10.1.0.65:/backups                  2.7T  2.6T   28G  99% /backups
+backups                                   6.9T  112K  6.9T   1% /usr/local/backups
+$
+
+Looks good!
+
+7. Inspect blocks in storage pool:
+# zdb -b backups
+
+Traversing all blocks to verify nothing leaked ...
+
+        No leaks (block sum matches space maps exactly)
+
+        bp count:           54634
+        bp logical:    7031540224      avg: 128702
+        bp physical:   7025635840      avg: 128594     compression:   1.00
+        bp allocated:  7036166144      avg: 128787     compression:   1.00
+        bp deduped:             0    ref>1:      0   deduplication:   1.00
+        SPA allocated: 7036166144     used:  0.09%
+
+#
+
+pthree.org/2012/12/18/zfs-administration-part-xi-compression-and-deduplication/
+
+Looks good not need to learn the meaning of everything.
+
+
+
+Links
+=====
+ZFS - archlinux
+https://wiki.archlinux.org/index.php/ZFS
+
+ZFS Administration, Part XI- Compression and Deduplication
+by Aaron Toponce
+Linux. GNU. Freedom.
+https://pthree.org/2012/12/18/zfs-administration-part-xi-compression-and-deduplication/
+
+ZFS Deduplication
+By bonwick on Nov 01, 2009
+Very good page on zfs deduplication with dedup command:
+"zfs set dedup=on tank"
+https://blogs.oracle.com/bonwick/entry/zfs_dedup
