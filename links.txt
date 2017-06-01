@@ -21,6 +21,11 @@ File systems, Data Loss and ZFS
 September 11, 2014 by Richard Yao
 https://clusterhq.com/blog/file-systems-data-loss-zfs/
 
+Quick Start Guide
+The Z File System (ZFS)
+Lots of good syntax here
+https://www.freebsd.org/doc/handbook/zfs-quickstart.html
+
 Simple ZFS Mirrored file system
 Posted on 04/05/2013 by Phillip Cooper
 http://phillipcooper.co.uk/2013/05/simple-zfs-mirrored-file-system/
