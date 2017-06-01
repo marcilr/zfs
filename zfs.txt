@@ -15,6 +15,30 @@ ACLs.
 wikipedia.org/wiki/ZFS
 
 
+A Solaris file system that uses storage pools to manage physical storage.
+The ZFS pooled storage model eliminates the concept of volumes and the
+associated problems of partitions, provisioning and stranded storage by
+enabling thousands of file systems to draw from a common storage pool,
+using only as much space as it actually needs.  ZFS also uses RAID-Z,
+a data replication model that is similar to RAID-5 but uses variable
+stripe width to eliminate the RAID-5 write hole-that is stripe corruption
+due to loss of power between data and parity updates.  All RAID-Z writes
+are full-stripe writes.  There's no read-modify-write tax, no write hole,
+and no need for NVRAM in hardware.
+
+According to the FAQ posted on OpenSolaris.org, originally, ZFS was an
+acronym for "Zettabyte File System."  The largest SI prefix that the
+developers liked was 'zetta', and since ZFS is a 128-bit file system,
+the name was a reference to the fact that ZFS can store 256 quadrillion
+zettabytes (where each ZB is 270 bytes). Over time, ZFS gained a lot more
+features besides 128-bit capacity, such as rock-solid data integrity,
+easy administration, and a simplified model for managing your data.
+
+ZFS is open-source software that is licensed under the Common Development
+and Distribution License (CDDL).
+--www.webopedia.com/TERM/Z/ZFS.html
+
+
 Deduplication
 =============
 ZFS provides block-level deduplication because this is the finest granularity
@@ -152,6 +176,9 @@ http://lifehacker.com/#!5660551/your-best-solutions-for-massive-multi+terabyte-s
 ZFS
 From Wikipedia, the free encyclopedia
 http://en.wikipedia.org/wiki/ZFS
+
+ZFS
+http://www.webopedia.com/TERM/Z/ZFS.html
 
 ZFS on Linux
 http://zfsonlinux.org/faq.html#HowDoIInstallIt
