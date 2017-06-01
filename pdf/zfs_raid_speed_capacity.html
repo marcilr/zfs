@@ -1,0 +1,1882 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+<link rel="alternate" type="application/rss+xml" title="Calomel.org RSS Feed" href="https://calomel.org/calomel_rss.xml" />
+<link rel="icon" sizes="16x16" type="image/png" href="data:image/png;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///8A////AL+AEBDJgBfvyYEY/8mBGP/JgRj/yYAWUMmAF+/JgRj/yIAWn////wD///8A////AP///wD///8A////AP///wDHgBiAyYEY/8mBGP/JgRj/x4AYYP///wDJgRj/yYEY/8mBGP/IgBaf////AP///wD///8A////AP///wD///8AyIAX38mBGP/JgRj/x4AYYP///wD///8AyIAX38mBGP/JgRj/yYEY/8iAF3D///8A////AP///wD///8AyYAWUMmBGP/JgRj/yYAXz////wD///8A////AP///wDHgBhAx4AYgMeAGIDFgBUw////AP///wD///8A////AMeAGIDJgRj/yYEY/8mBGP/IgBaf////AP///wD///8A////AP///wD///8A////AMeAGCDIgBe/x4AYYP///wC/gBAQyIAXv8mBGP/JgRj/yYEY/8mBGP/JgRj/yIAX3////wD///8A////AP///wC/gBAQyYAX78mBGP/JgBfvx4AYgP///wDHgBggyIAXcMiAF9/JgRj/yYEY/8mAF+////8A////AP///wD///8A////AMWAFTDJgBfvyYAXz7+AEBDIgBePx4AYIP///wD///8Ax4AYQMeAGIDFgBUw////AP///wD///8A////AP///wD///8A////AP///wDHgBhgyYEY/8eAGEC/gBAQxYAVMP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8AyIAX38mAF++/gBAQyIAWn8iAF7////8AyIAXv8iAF6////8A////AP///wD///8A////AP///wD///8A////AMmBGP/IgBdw////AMmAF+/IgBe/////AMmBGP/IgBe/////AP///wD///8A////AP///wD///8A////AMmAF8/IgBeP////AP///wDJgRj/x4AYgP///wDJgBfvyIAXj////wD///8A////AP///wD///8A////AP///wDJgRj/x4AYYP///wD///8Ax4AYQL+AEBD///8AxYAVMMeAGCD///8A////AP///wD///8A////AP///wD///8AyIAXcP///wD///8AyIAXr8mAF+////8A////AMmBGP/IgBe/////AP///wD///8A////AP///wD///8A////AP///wD///8A////AMmAF+/JgBfP////AP///wDJgBfvx4AYgP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wDIgBdwxYAVMP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==" />
+
+<title>ZFS Raidz Performance, Capacity and Integrity Comparison @ Calomel.org</title>
+
+<style type="text/css">
+body {color:#FFFFFF;display:block;font-family: "Verdana", "sans-serif";margin:0 auto;overflow:auto;overflow-x:hidden;padding:0px;background:#FFFFFF url("/calomel_image.jpg");background-size:100% auto;background-attachment:fixed;background-position:top center;background-repeat:no-repeat;}
+img {border:0;height:auto;max-width:100%;outline:none;padding-left:5em;padding-right:5em;}
+hr { border:0; border-top:1px solid #E0E0E0; width:70%; }
+h2 { color:#707070; padding:3em 0em 0em 0em; }
+h3 { color:#606060; padding:3em 0em 0em 0em; }
+p { padding:1em 0em 0.5em 0em; }
+ul li { padding:0em 0em 0.5em 0em;}
+.boxiconbottom {padding:10% 0% 15% 0%;text-align:center;background:#FFFFFF;}
+.boxcenter {background-color:#FFF;color:#303030;font-size: 100%;line-height:1.5;margin:45% auto 0% auto;padding:0% 10% 5% 10%;word-wrap: break-word;}
+.boxcenter a:link { color:#0000FF; text-decoration:none; }
+.boxcenter a:hover { color:#0000FF; text-decoration:underline; }
+.code {background-color:#E8E8E8;border:1px inset;color:#4d3e32;font-family: "monospace";font-size: 100%;line-height:1.5;margin:0.5em auto 0.5em auto;max-height:700px;overflow:auto;word-wrap: normal;padding:1em;}
+.note {background: #E8E8E8;border-radius: 1em 1em 1em 1em;box-shadow: 0 10px 10px rgba(0,0,0,0.3), -10px 10px 10px rgba(0,0,0,0.2);color: #000000;font-size: 100%;line-height:1.5;margin: 10em auto;overflow: hidden;padding: 1em 1.5em;position: relative;width: 70%;word-wrap: break-word;}
+.title_main {text-align:center;color:#707070; padding:5em 0em 0em 0em}
+.title_sub {text-align:center;color:#707070; padding:0em 0em 4em 0em;}
+.alignleft {float: left;color:#B8B8B8;padding-right:2em;}
+.alignright {float: right;color:#B8B8B8}
+.boxcenter a.alignleft:link   {color:#B8B8B8; text-decoration:none;}
+.boxcenter a.alignleft:hover  {color:#0000FF; text-decoration:underline;}
+.boxcenter a.alignright:link  {color:#B8B8B8; text-decoration:none;}
+.boxcenter a.alignright:hover {color:#B8B8B8; text-decoration:none;}
+</style>
+
+</head>
+
+<body>
+
+<div class="boxcenter">
+
+<a class="alignleft" href="/">home</a>
+<a class="alignleft" href="/calomel_rss.xml">rss</a>
+<a class="alignleft" href="https://encrypted.google.com/search?&q=site%3Acalomel.org&btnG=Search">search</a>
+<a class="alignright">January 01, 2017</a>
+
+<h1 class="title_main">ZFS Raidz Performance, Capacity and Integrity</h1>
+<hr>
+<h3 class="title_sub">comparing speed, space and safety per raidz type</h3>
+
+<p>ZFS includes data integrity verification, protection against data
+corruption, support for high storage capacities, great performance,
+replication, snapshots and copy-on-write clones, and self healing which make it
+a natural choice for data storage.</p>
+
+<p>The most asked question when talking about raids is, "Which raid is the
+best?" The best depends on what you are trying to achieve and what you are
+willing to give up. The question we should be asking ourselves is, "How
+important is our data ?"</p>
+
+<p>Eventually you will lose a drive and depending on the raid solution will
+decide if data is lost. If the raid loses a single drive and all your files are
+gone could be a disaster. You may want to look at a safer raid configuration so
+the raid can lose two or more drives. The problem with higher data safety is
+you may have to give up speed or capacity or both.</p>
+
+<p>Raids have three main benefits: Performance, Capacity and Integrity.
+Performance is how fast the raid will read and write data and is measured in
+megabytes per second as well as in milliseconds of latency. Capacity is how
+much does the raid hold. Integrity is how many disks can fail before all the
+data is lost. The problem is you may not be able to take advantage of all
+three benefits.</p>
+
+<p>The ASCII triangle below shows all three properties. If you put your mouse
+cursor in the center of the triangle and move to one property, you see the
+other properties getting farther away. For example, raid0 is both fast and has
+the highest capacity, but absolutely no data integrity. Raid1 on the other hand
+has fantastic integrity and fast reads, but slow writes (multiple copies) and
+has limited capacity.</p>
+
+<pre class="code">
+        Raids have three main advantages over using a single disk.
+               Performance, capacity and data integrity.
+
+                               capacity
+                                  /\
+                                 /  \
+                                /    \
+                               /      \ 
+                  performance /________\ integrity
+
+</pre>
+
+<h3>What are the advantages and disadvantages of each raid type ?</h3>
+
+<ul>
+
+<li><b>raid0 or striping array</b> has no redundancy, but provides the best
+performance and additional storage. Any drive failure destroys the entire array
+so raid 0 is not safe at all. if you need really fast scratch space for video
+editing then raid0 does well.</li>
+
+<li><b>raid1 or mirroring </b> simply mirrors the same data over every drive in
+the array. This is excellent redundancy as you can lose every drive except one
+and still have access to the data. A positive is the raid read speed is
+increased by every drive added to the array. The big negative is low capacity
+and slow write speed speeds. No matter how many drives are in the raid you have
+the total capacity of a single drive to use. Speed is reduced because every
+drive gets a complete copy of the same files. Mirroring is normally used for
+two(2) drives, not for 12 and 24 like in our tests due to the incredible amount
+of wasted space.</li>
+
+<li><b>raid 2, raid 3 and raid 4</b> are not tested as they are no longer used
+by the IT industry. Raid2 uses an equal amount of disks as dedicated ECC
+drives. Raid 3 and 4 use a single dedicated parity drive. None of these raids
+are used in production anymore due to horrible random read and write
+performance.</li>
+
+<li><b>raid5 or raidz</b> distributes parity along with the data and can lose
+one physical drive before a raid failure. Because parity needs to be calculated
+raid 5 is slower then raid0, but raid 5 is much safer. RAID 5 requires at least
+three hard disks in which one(1) full disk of space is used for parity.</li>
+
+<li><b>raid6 or raidz2</b> distributes parity along with the data and can lose
+two physical drives instead of just one like raid 5. Because more parity needs
+to be calculated raid 6 is slower then raid5, but raid6 is safer. raidz2
+requires at least four disks and will use two(2) disks of space for
+parity.</li>
+
+<li><b>raid7 or raidz3</b> distributes parity just like raid 5 and 6, but raid7
+can lose three physical drives. Since triple parity needs to be calculated
+raid 7 is slower then raid5 and raid 6, but raid 7 is the safest of the three.
+raidz3 requires at least four, but should be used with no less then five(5)
+disks, of which three(3) disks of space are used for parity.</li>
+
+<li><b>raid10 or raid1+0</b> is mirroring and striping of data. The simplest
+raid10 array has four disks and consists of two pairs of mirrors. Disk 1 and 2
+are mirrors and separately disk 3 and 4 are another mirror. Data is then
+striped (think raid0) across both mirrors. You can lose one drive in each
+mirror and the data is still safe. You can not lose both drives which make up
+one mirror, for example drives 1 and 2 can not be lost at the same time. Raid
+10 's advantage is reading data is fast. The disadvantages are the writes are
+slow (multiple mirrors) and capacity is low.</li>
+
+<li><b>raid60 or raid6+0</b> is a stripe of two or more raid6 volumes. You get
+the advantage of raid6 safety (lose two drives per raid6 array) and of raid0
+striping read speeds. The negatives are the same as raid10.</li>
+
+<li><b>raid70 or raid7+0</b> is a stripe of two or more raid7 volumes. Just
+like raid6, you take advantage of raid7 safety and raid0 striping read speeds,
+but lose capacity.</li>
+
+</ul>
+
+
+<p><b>Be Safe, Not Sorry.</b> When choosing a raid configuration you may look
+at raidz or RAID5 and see the speed and capacity benefits and decide it is a
+good choice. From real world experience we highly suggest NOT using raid5. It
+is simply not safe enough. We recommend using RAID1 mirroring or RAID6 (double
+parity) or even RAID7 (triple parity). The problem with raid5 is you only have
+one drive with parity. When one drive dies the raid5 array is degraded and you
+can not loose another drive before you lose the entire array; i.e. all your
+data is lost. What happens most of the time is one drive dies, you replace the
+drive and the array starts resilvering or rebuilding. This is when the other
+disks are being stressed and during this rebuild is when you have a very good
+chance (around 8%) that you you will lose another drive. For more information
+please take some time to read <a
+href="http://storagemojo.com/2007/02/26/netapp-weighs-in-on-disks/">NetApp
+Weighs In On Disks</a> which was written in 2007, but is still valid today
+since drive technology has not changed much.</p>
+
+
+<h3>Specification of the testing raid chassis and environment</h3>
+
+<p>All tests are run on the same day on the same machine. Our goal was to rule
+out variability in the hardware so that any differences in performance were the
+result of the ZFS raid configuration itself.</p>
+
+<ul>
+<li> FreeBSD 10.2, patched up to article publishing date</li>
+<li> Apply our <a href="/freebsd_network_tuning.html">FreeBSD Tuning and Optimization</a> performance modifications.</li>
+<li> CPU: Intel E5-2630 single socket six(6) core</li>
+<li> RAM: Kingston 16gig of DDR3 1600MHz</li>
+<li> HBA: Avago Technologies (LSI) SAS2308 9207-8i in a PCI-E 3.0 x16 slot</li>
+<li> CASE: SuperMicro 4U, SuperChassis 846BE16-R1K28B</li>
+<li> OS Drive: Samsung 850 PRO 256GB</li>
+<li> RAID Drives: Western Digital Black 4TB 7200rpm SAS (WD4001FYYG), 24 drives</li>
+<li> MOTHERBOARD: Supermicro X9SRE</li>
+<li> SAS Expander: SuperMicro Back Plane, BPN-SAS2-846EL1</li>
+<li> Server Room Temperature: 21C, 71F, 294K at height of server</li>
+<li> Server Room Humidity: ~40% at front of chassis</li>
+<li> Server Room Air Flow: ~240 cubic meters of air per hour</li>
+<li> Server Sound Pressure Level: 73 dB @ 1 ft measured at the front of the chassis</li>
+<li> Server Chassis Vibration: less then 0.01 m/s2 measured at chassis drive back plane</li>
+<li> Benchmark Suite: Bonnie++ v1.97</li>
+</ul>
+
+<h3>Bonnie++ benchmarks</h3>
+
+<p>Bonnie++ is a benchmark suite aimed at performing a number of simple tests
+reporting hard drive and file system performance. The benchmark test uses
+database type calls to a single file to simulate creation, reading, and
+deleting of many small files.</p>
+
+<p>The ZFS pools are created with LZ4 compression disabled so the Bonnie++ test
+data will be written directly to disk. Bonnie++ generates a 16 gigabyte file
+which was chosen because it could not fit into 16 gig of RAM or the ZFS ARC.
+Bonnie++ is using four(4) concurrent threads to better simulate real world
+server loads. A scripted while loop runs bonnie three(3) times and we report
+the median (middle) performance metric. After each bonnie run the system sleeps
+for 30 seconds so the load can subside.</p>
+
+<p>Bonnie++ can do asynchronous I/O, which means the local disk cache of the 4k
+drive is heavily utilized with a flush between ZFS commits once every 30
+seconds. Since the disk cache can artificially inflate the results we choose to
+disable drive caches completely using Bonnie++ in synchronous test mode only.
+Syncing after each write will result in lower benchmark values, but the numbers
+will more closely resemble a server which is heavily loaded and using all of
+its RAM.</p>
+
+<pre class="code">
+bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+</pre>
+
+<h3>Quick Summery: ZFS Speeds and Capacity</h3>
+
+<p>The following table shows a summery of all the tests and lists the number of
+disks, raid types, capacity and performance metrics for easy comparison. The
+speeds display "w" for write, "rw" for rewrite and "r" for read and throughput
+is in megabytes per second.</p>
+
+<p>ZFS uses variable-sized blocks of up to 1024 kilobytes. If data compression
+(LZJB or LZ4) is enabled, variable block sizes are used. If a block can be
+compressed to fit into a smaller block size, the smaller size is used on the
+disk to use less storage and improve IO throughput at the cost of increased CPU
+use for the compression and decompression operations. Take a look at our
+compression study further down this page.</p>
+
+<p>When building a RAID it is common practice to use the "power of two plus
+parity" raid infrastructure to maximize parity striping, speed and well as
+capacity. When using ZFS the standard RAID rules may not apply, especially when
+LZ4 compression is active. ZFS can vary the size of the stripes on each disk
+and compression can make those stripes unpredictable. The current rule of thumb
+when making a ZFS raid is:</p>
+
+<ul>
+<li>MIRROR (raid1) used with two(2) to four(4) disks or more.</li>
+<li>RAIDZ-1 (raid5) used with five(5) disks or more.</li>
+<li>RAIDZ-2 (raid6) used with six(6) disk or more.</li>
+<li>RAIDZ-3 (raid7) used with eleven(11) disks or more.</li>
+</ul>
+
+<h3>Spinning platter hard drive raids</h3>
+
+<p>The server is setup using an Avago LSI Host Bus Adapter (HBA) and not a raid
+card. The HBA is connected to the SAS expander using a single multilane cable
+to control all 24 drives. LZ4 compression is disabled and all writes are synced
+in real time by the testing suite, Bonnie++. We wanted to test the raid
+configurations against the drives themselves without LZ4 compression or extra
+RAM to use for ZFS ARC. You can expect your speeds to easily increase by a
+factor of two(2) when storing compressible data with LZ4 enabled and when
+adding RAM at least twice as large as the data sets being read and written.</p>
+
+<pre class="code">
+            ZFS Raid Speed Capacity and Performance Benchmarks
+                   (speeds in megabytes per second)
+
+ 1x 4TB, single drive,          3.7 TB,  w=108MB/s , rw=50MB/s  , r=204MB/s 
+ 2x 4TB, mirror (raid1),        3.7 TB,  w=106MB/s , rw=50MB/s  , r=488MB/s 
+ 2x 4TB, stripe (raid0),        7.5 TB,  w=237MB/s , rw=73MB/s  , r=434MB/s 
+ 3x 4TB, mirror (raid1),        3.7 TB,  w=106MB/s , rw=49MB/s  , r=589MB/s 
+ 3x 4TB, stripe (raid0),       11.3 TB,  w=392MB/s , rw=86MB/s  , r=474MB/s 
+ 3x 4TB, raidz1 (raid5),        7.5 TB,  w=225MB/s , rw=56MB/s  , r=619MB/s 
+ 4x 4TB, 2 striped mirrors,     7.5 TB,  w=226MB/s , rw=53MB/s  , r=644MB/s 
+ 4x 4TB, raidz2 (raid6),        7.5 TB,  w=204MB/s , rw=54MB/s  , r=183MB/s 
+ 5x 4TB, raidz1 (raid5),       15.0 TB,  w=469MB/s , rw=79MB/s  , r=598MB/s 
+ 5x 4TB, raidz3 (raid7),        7.5 TB,  w=116MB/s , rw=45MB/s  , r=493MB/s 
+ 6x 4TB, 3 striped mirrors,    11.3 TB,  w=389MB/s , rw=60MB/s  , r=655MB/s 
+ 6x 4TB, raidz2 (raid6),       15.0 TB,  w=429MB/s , rw=71MB/s  , r=488MB/s 
+10x 4TB, 2 striped 5x raidz,   30.1 TB,  w=675MB/s , rw=109MB/s , r=1012MB/s 
+11x 4TB, raidz3 (raid7),       30.2 TB,  w=552MB/s , rw=103MB/s , r=963MB/s 
+12x 4TB, 6 striped mirrors,    22.6 TB,  w=643MB/s , rw=83MB/s  , r=962MB/s 
+12x 4TB, 2 striped 6x raidz2,  30.1 TB,  w=638MB/s , rw=105MB/s , r=990MB/s 
+12x 4TB, raidz (raid5),        41.3 TB,  w=689MB/s , rw=118MB/s , r=993MB/s 
+12x 4TB, raidz2 (raid6),       37.4 TB,  w=317MB/s , rw=98MB/s  , r=1065MB/s 
+12x 4TB, raidz3 (raid7),       33.6 TB,  w=452MB/s , rw=105MB/s , r=840MB/s 
+22x 4TB, 2 striped 11x raidz3, 60.4 TB,  w=567MB/s , rw=162MB/s , r=1139MB/s 
+23x 4TB, raidz3 (raid7),       74.9 TB,  w=440MB/s , rw=157MB/s , r=1146MB/s
+24x 4TB, 12 striped mirrors,   45.2 TB,  w=696MB/s , rw=144MB/s , r=898MB/s 
+24x 4TB, raidz (raid5),        86.4 TB,  w=567MB/s , rw=198MB/s , r=1304MB/s 
+24x 4TB, raidz2 (raid6),       82.0 TB,  w=434MB/s , rw=189MB/s , r=1063MB/s 
+24x 4TB, raidz3 (raid7),       78.1 TB,  w=405MB/s , rw=180MB/s , r=1117MB/s 
+24x 4TB, striped raid0,        90.4 TB,  w=692MB/s , rw=260MB/s , r=1377MB/s 
+
+########                                                        ###########
+########  Below are the zpool commands and RAW Bonnie++ output  ###########
+########                                                        ###########
+
+
+###############################################################################
+
+1x 4TB, single drive, 3.7 TB,  w=108MB/s , rw=50MB/s , r=204MB/s
+
+root@FreeBSDzfs:  zpool create storage da0
+
+root@FreeBSDzfs:  bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           108834  25 50598  11           204522   9 393.0   4
+Latency                        1992ms    2372ms              1200ms     289ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          da0       ONLINE       0     0     0
+
+###############################################################################
+
+2x 4TB, mirror (raid1), 3.7 TB,  w=106MB/s , rw=50MB/s , r=488MB/s
+
+root@FreeBSDzfs: zpool create storage mirror da0 da1
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           106132  25 50303  10           488762  23 445.7   4
+Latency                        9435ms    4173ms               220ms     195ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          mirror-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+
+###############################################################################
+
+2x 4TB, stripe (raid0), 7.5 TB,  w=237MB/s , rw=73MB/s , r=434MB/s
+
+root@FreeBSDzfs:  zpool create storage da0 da1
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           237933  43 73012  14           434041  20 513.1   5
+Latency                         505ms    4059ms               212ms     197ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          da0       ONLINE       0     0     0
+          da1       ONLINE       0     0     0
+
+###############################################################################
+
+3x 4TB, mirror (raid1), 3.7 TB,  w=106MB/s , rw=49MB/s , r=589MB/s
+
+root@FreeBSDzfs: zpool create storage mirror da0 da1 da2
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           106749  24 49659  11           589971  27 457.3   5
+Latency                       12593ms    4069ms               134ms     191ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          mirror-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+
+###############################################################################
+
+3x 4TB, stripe (raid0), 11.3 TB,  w=392MB/s , rw=86MB/s , r=474MB/s
+
+root@FreeBSDzfs:  zpool create storage da0 da1 da2
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           392378  59 86799  16           474157  22 829.3   8
+Latency                         315us    4038ms               129ms     141ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          da0       ONLINE       0     0     0
+          da1       ONLINE       0     0     0
+          da2       ONLINE       0     0     0
+
+###############################################################################
+
+3x 4TB, raidz1 (raid5), 7.5 TB,  w=225MB/s , rw=56MB/s , r=619MB/s
+
+root@FreeBSDzfs:  zpool create storage raidz da0 da1 da2
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           225143  40 56590  11           619315  30 402.9   5
+Latency                        2204ms    4052ms               896ms     177ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          raidz1-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+
+###############################################################################
+
+4x 4TB, 2 striped mirrors, 7.5 TB,  w=226MB/s , rw=53MB/s , r=644MB/s
+
+root@FreeBSDzfs:  zpool create storage mirror da0 da1 mirror da2 da3
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           226933  42 53878   9           644043  31 427.8   4
+Latency                        1356ms    4066ms              1638ms     221ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          mirror-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+          mirror-1  ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+            da3     ONLINE       0     0     0
+
+###############################################################################
+
+4x 4TB, raidz2 (raid6), 7.5 TB,  w=204MB/s , rw=54MB/s , r=183MB/s
+
+root@FreeBSDzfs:  zpool create storage raidz2 da0 da1 da2 da3
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           204686  36 54769  13           183487   9 365.5   6
+Latency                        5292ms    6356ms               449ms     233ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          raidz2-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+            da3     ONLINE       0     0     0
+
+###############################################################################
+
+5x 4TB, raidz1 (raid5), 15.0 TB,  w=469MB/s , rw=79MB/s , r=598MB/s
+
+root@FreeBSDzfs:  zpool create storage raidz1 da0 da1 da2 da3 da4
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           469287  69 79083  15           598770  29 561.2   7
+Latency                        1202us    4047ms               137ms     157ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          raidz1-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+            da3     ONLINE       0     0     0
+            da4     ONLINE       0     0     0
+
+###############################################################################
+
+5x 4TB, raidz3 (raid7), 7.5 TB,  w=116MB/s , rw=45MB/s , r=493MB/s
+
+root@FreeBSDzfs:  zpool create storage raidz3 da0 da1 da2 da3 da4
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           116395  21 45652   9           493679  25 397.7   5
+Latency                       27836ms    6418ms             95509us     152ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          raidz3-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+            da3     ONLINE       0     0     0
+            da4     ONLINE       0     0     0
+
+###############################################################################
+
+6x 4TB, 3 striped mirrors, 11.3 TB,  w=389MB/s , rw=60MB/s , r=655MB/s
+
+root@FreeBSDzfs:  zpool create storage mirror da0 da1 mirror da2 da3 mirror da4 da5
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           389316  62 60493  11           655534  32 804.4   9
+Latency                         549us    2473ms              1997ms     186ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          mirror-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+          mirror-1  ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+            da3     ONLINE       0     0     0
+          mirror-2  ONLINE       0     0     0
+            da4     ONLINE       0     0     0
+            da5     ONLINE       0     0     0
+
+###############################################################################
+
+6x 4TB, raidz2 (raid6), 15.0 TB,  w=429MB/s , rw=71MB/s , r=488MB/s
+
+root@FreeBSDzfs:  zpool create storage raidz2 da0 da1 da2 da3 da4 da5
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           429953  67 71505  14           488952  25 447.7   6
+Latency                         358us    4057ms               197ms     181ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          raidz2-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+            da3     ONLINE       0     0     0
+            da4     ONLINE       0     0     0
+            da5     ONLINE       0     0     0
+
+###############################################################################
+
+10x 4TB, 2 striped 5x raidz, 30.1 TB,  w=675MB/s , rw=109MB/s , r=1012MB/s
+
+root@FreeBSDzfs:  zpool create storage raidz da0 da1 da2 da3 da4 raidz da5 da6 da7 da8 da9
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           675195  93 109169  21           1012768  50 817.6   9
+Latency                       11619us    4471ms             84450us     110ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          raidz1-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+            da3     ONLINE       0     0     0
+            da4     ONLINE       0     0     0
+          raidz1-1  ONLINE       0     0     0
+            da5     ONLINE       0     0     0
+            da6     ONLINE       0     0     0
+            da7     ONLINE       0     0     0
+            da8     ONLINE       0     0     0
+            da9     ONLINE       0     0     0
+
+###############################################################################
+
+11x 4TB, raidz3 (raid7), 30.2 TB,  w=552MB/s , rw=103MB/s , r=963MB/s
+
+root@FreeBSDzfs:  zpool create storage raidz3 da0 da1 da2 da3 da4 da5 da6 da7 da8 da9 da10
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           552264  79 103947  20           963511  48 545.6   8
+Latency                        7373us    4045ms             84226us     144ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          raidz3-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+            da3     ONLINE       0     0     0
+            da4     ONLINE       0     0     0
+            da5     ONLINE       0     0     0
+            da6     ONLINE       0     0     0
+            da7     ONLINE       0     0     0
+            da8     ONLINE       0     0     0
+            da9     ONLINE       0     0     0
+            da10    ONLINE       0     0     0
+
+###############################################################################
+
+12x 4TB, 6 striped mirrors, 22.6 TB,  w=643MB/s , rw=83MB/s , r=962MB/s
+
+root@FreeBSDzfs:  zpool create storage mirror da0 da1 mirror da2 da3 mirror da4 da5 mirror da6 da7 mirror da8 da9 mirror da10 da11
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           643886  91 83717  15           962904  47  1257  13
+Latency                       17335us    4040ms              1884ms     175ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          mirror-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+          mirror-1  ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+            da3     ONLINE       0     0     0
+          mirror-2  ONLINE       0     0     0
+            da4     ONLINE       0     0     0
+            da5     ONLINE       0     0     0
+          mirror-3  ONLINE       0     0     0
+            da6     ONLINE       0     0     0
+            da7     ONLINE       0     0     0
+          mirror-4  ONLINE       0     0     0
+            da8     ONLINE       0     0     0
+            da9     ONLINE       0     0     0
+          mirror-5  ONLINE       0     0     0
+            da10    ONLINE       0     0     0
+            da11    ONLINE       0     0     0
+
+###############################################################################
+
+12x 4TB, 2 striped 6x raidz2, 30.1 TB,  w=638MB/s , rw=105MB/s , r=990MB/s
+
+root@FreeBSDzfs:  zpool create storage raidz2 da0 da1 da2 da3 da4 da5 raidz2 da6 da7 da8 da9 da10 da11
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           638918  89 105631  21           990167  49 773.7  10
+Latency                       15398us    6170ms               104ms     113ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          raidz2-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+            da3     ONLINE       0     0     0
+            da4     ONLINE       0     0     0
+            da5     ONLINE       0     0     0
+          raidz2-1  ONLINE       0     0     0
+            da6     ONLINE       0     0     0
+            da7     ONLINE       0     0     0
+            da8     ONLINE       0     0     0
+            da9     ONLINE       0     0     0
+            da10    ONLINE       0     0     0
+            da11    ONLINE       0     0     0
+
+###############################################################################
+
+12x 4TB, raidz (raid5), 41.3 TB,  w=689MB/s , rw=118MB/s , r=993MB/s
+
+root@FreeBSDzfs:  zpool create storage raidz da0 da1 da2 da3 da4 da5 da6 da7 da8 da9 da10 da11
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           689424  96 118573  23           993618  52 647.3   9
+Latency                       14466us    3700ms               127ms     141ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          raidz1-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+            da3     ONLINE       0     0     0
+            da4     ONLINE       0     0     0
+            da5     ONLINE       0     0     0
+            da6     ONLINE       0     0     0
+            da7     ONLINE       0     0     0
+            da8     ONLINE       0     0     0
+            da9     ONLINE       0     0     0
+            da10    ONLINE       0     0     0
+            da11    ONLINE       0     0     0
+
+###############################################################################
+
+12x 4TB, raidz2 (raid6), 37.4 TB,  w=317MB/s , rw=98MB/s , r=1065MB/s
+
+root@FreeBSDzfs:  zpool create storage raidz2 da0 da1 da2 da3 da4 da5 da6 da7 da8 da9 da10 da11
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           317741  45 98974  22           1065349  56 495.5   8
+Latency                       11742ms    4062ms             90593us     150ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          raidz2-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+            da3     ONLINE       0     0     0
+            da4     ONLINE       0     0     0
+            da5     ONLINE       0     0     0
+            da6     ONLINE       0     0     0
+            da7     ONLINE       0     0     0
+            da8     ONLINE       0     0     0
+            da9     ONLINE       0     0     0
+            da10    ONLINE       0     0     0
+            da11    ONLINE       0     0     0
+
+###############################################################################
+
+12x 4TB, raidz3 (raid7), 33.6 TB,  w=452MB/s , rw=105MB/s , r=840MB/s
+
+root@FreeBSDzfs:  zpool create storage raidz3 da0 da1 da2 da3 da4 da5 da6 da7 da8 da9 da10 da11
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           452865  66 105396  24           840136  44 476.2   7
+Latency                         706us    4069ms              2050ms     165ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          raidz3-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+            da3     ONLINE       0     0     0
+            da4     ONLINE       0     0     0
+            da5     ONLINE       0     0     0
+            da6     ONLINE       0     0     0
+            da7     ONLINE       0     0     0
+            da8     ONLINE       0     0     0
+            da9     ONLINE       0     0     0
+            da10    ONLINE       0     0     0
+            da11    ONLINE       0     0     0
+
+###############################################################################
+
+22x 4TB, 2 striped 11x raidz3, 60.4 TB,  w=567MB/s , rw=162MB/s , r=1139MB/s
+
+root@FreeBSDzfs:  zpool create storage raidz3 da0 da1 da2 da3 da4 da5 da6 da7 da8 da9 da10 raidz3 da11 da12 da13 da14 da15 da16 da17 da18 da19 da20 da21
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           567667  83 162462  32           1139088  59 770.3  13
+Latency                        4581us    2700ms             78597us     116ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          raidz3-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+            da3     ONLINE       0     0     0
+            da4     ONLINE       0     0     0
+            da5     ONLINE       0     0     0
+            da6     ONLINE       0     0     0
+            da7     ONLINE       0     0     0
+            da8     ONLINE       0     0     0
+            da9     ONLINE       0     0     0
+            da10    ONLINE       0     0     0
+          raidz3-1  ONLINE       0     0     0
+            da11    ONLINE       0     0     0
+            da12    ONLINE       0     0     0
+            da13    ONLINE       0     0     0
+            da14    ONLINE       0     0     0
+            da15    ONLINE       0     0     0
+            da16    ONLINE       0     0     0
+            da17    ONLINE       0     0     0
+            da18    ONLINE       0     0     0
+            da19    ONLINE       0     0     0
+            da20    ONLINE       0     0     0
+            da21    ONLINE       0     0     0
+
+###############################################################################
+
+23x 4TB, raidz3 (raid7), 74.9 TB,  w=440MB/s , rw=157MB/s , r=1146MB/s
+
+root@FreeBSDzfs:  zpool create storage raidz3 da0 da1 da2 da3 da4 da5 da6 da7 da8 da9 da10 da11 da12 da13 da14 da15 da16 da17 da18 da19 da20 da21 da22
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           440656  64 157066  34           1146275  76 408.8   8
+Latency                       21417us    2324ms               154ms     195ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          raidz3-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+            da3     ONLINE       0     0     0
+            da4     ONLINE       0     0     0
+            da5     ONLINE       0     0     0
+            da6     ONLINE       0     0     0
+            da7     ONLINE       0     0     0
+            da8     ONLINE       0     0     0
+            da9     ONLINE       0     0     0
+            da10    ONLINE       0     0     0
+            da11    ONLINE       0     0     0
+            da12    ONLINE       0     0     0
+            da13    ONLINE       0     0     0
+            da14    ONLINE       0     0     0
+            da15    ONLINE       0     0     0
+            da16    ONLINE       0     0     0
+            da17    ONLINE       0     0     0
+            da18    ONLINE       0     0     0
+            da19    ONLINE       0     0     0
+            da20    ONLINE       0     0     0
+            da21    ONLINE       0     0     0
+            da22    ONLINE       0     0     0
+
+###############################################################################
+
+24x 4TB, 12 striped mirrors, 45.2 TB,  w=696MB/s , rw=144MB/s , r=898MB/s
+
+root@FreeBSDzfs:  zpool create storage mirror da0 da1 mirror da2 da3 mirror da4 da5 mirror da6 da7 mirror da8 da9 mirror da10 da11 mirror da12 da13 mirror da14 da15 mirror da16 da17 mirror da18 da19 mirror da20 da21 mirror da22 da23
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           696733  94 144526  27           898137  51  1520  16
+Latency                       17247us    2850ms              2014ms   79930us
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME         STATE     READ WRITE CKSUM
+        storage      ONLINE       0     0     0
+          mirror-0   ONLINE       0     0     0
+            da0      ONLINE       0     0     0
+            da1      ONLINE       0     0     0
+          mirror-1   ONLINE       0     0     0
+            da2      ONLINE       0     0     0
+            da3      ONLINE       0     0     0
+          mirror-2   ONLINE       0     0     0
+            da4      ONLINE       0     0     0
+            da5      ONLINE       0     0     0
+          mirror-3   ONLINE       0     0     0
+            da6      ONLINE       0     0     0
+            da7      ONLINE       0     0     0
+          mirror-4   ONLINE       0     0     0
+            da8      ONLINE       0     0     0
+            da9      ONLINE       0     0     0
+          mirror-5   ONLINE       0     0     0
+            da10     ONLINE       0     0     0
+            da11     ONLINE       0     0     0
+          mirror-6   ONLINE       0     0     0
+            da12     ONLINE       0     0     0
+            da13     ONLINE       0     0     0
+          mirror-7   ONLINE       0     0     0
+            da14     ONLINE       0     0     0
+            da15     ONLINE       0     0     0
+          mirror-8   ONLINE       0     0     0
+            da16     ONLINE       0     0     0
+            da17     ONLINE       0     0     0
+          mirror-9   ONLINE       0     0     0
+            da18     ONLINE       0     0     0
+            da19     ONLINE       0     0     0
+          mirror-10  ONLINE       0     0     0
+            da20     ONLINE       0     0     0
+            da21     ONLINE       0     0     0
+          mirror-11  ONLINE       0     0     0
+            da22     ONLINE       0     0     0
+            da23     ONLINE       0     0     0
+
+###############################################################################
+
+24x 4TB, raidz (raid5), 86.4 TB,  w=567MB/s , rw=198MB/s , r=1304MB/s
+
+root@FreeBSDzfs: zpool create storage raidz da0 da1 da2 da3 da4 da5 da6 da7 da8 da9 da10 da11 da12 da13 da14 da15 da16 da17 da18 da19 da20 da21 da22 da23
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           567164  82 198696  42           1304530  81 620.7  11
+Latency                       36614us    2252ms             70871us     141ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          raidz1-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+            da3     ONLINE       0     0     0
+            da4     ONLINE       0     0     0
+            da5     ONLINE       0     0     0
+            da6     ONLINE       0     0     0
+            da7     ONLINE       0     0     0
+            da8     ONLINE       0     0     0
+            da9     ONLINE       0     0     0
+            da10    ONLINE       0     0     0
+            da11    ONLINE       0     0     0
+            da12    ONLINE       0     0     0
+            da13    ONLINE       0     0     0
+            da14    ONLINE       0     0     0
+            da15    ONLINE       0     0     0
+            da16    ONLINE       0     0     0
+            da17    ONLINE       0     0     0
+            da18    ONLINE       0     0     0
+            da19    ONLINE       0     0     0
+            da20    ONLINE       0     0     0
+            da21    ONLINE       0     0     0
+            da22    ONLINE       0     0     0
+            da23    ONLINE       0     0     0
+
+###############################################################################
+
+24x 4TB, raidz2 (raid6), 82.0 TB,  w=434MB/s , rw=189MB/s , r=1063MB/s
+
+root@FreeBSDzfs: zpool create storage raidz2 da0 da1 da2 da3 da4 da5 da6 da7 da8 da9 da10 da11 da12 da13 da14 da15 da16 da17 da18 da19 da20 da21 da22 da23
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           434394  63 189521  39           1063626  75 516.9  12
+Latency                       11369us    2130ms             80053us     153ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          raidz2-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+            da3     ONLINE       0     0     0
+            da4     ONLINE       0     0     0
+            da5     ONLINE       0     0     0
+            da6     ONLINE       0     0     0
+            da7     ONLINE       0     0     0
+            da8     ONLINE       0     0     0
+            da9     ONLINE       0     0     0
+            da10    ONLINE       0     0     0
+            da11    ONLINE       0     0     0
+            da12    ONLINE       0     0     0
+            da13    ONLINE       0     0     0
+            da14    ONLINE       0     0     0
+            da15    ONLINE       0     0     0
+            da16    ONLINE       0     0     0
+            da17    ONLINE       0     0     0
+            da18    ONLINE       0     0     0
+            da19    ONLINE       0     0     0
+            da20    ONLINE       0     0     0
+            da21    ONLINE       0     0     0
+            da22    ONLINE       0     0     0
+            da23    ONLINE       0     0     0
+
+###############################################################################
+
+24x 4TB, raidz3 (raid7), 78.1 TB,  w=405MB/s , rw=180MB/s , r=1117MB/s
+
+root@FreeBSDzfs: zpool create storage raidz3 da0 da1 da2 da3 da4 da5 da6 da7 da8 da9 da10 da11 da12 da13 da14 da15 da16 da17 da18 da19 da20 da21 da22 da23
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           405579  62 180470  39           1117221  70 592.4  13
+Latency                         622ms    1959ms             94830us     187ms
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          raidz3-0  ONLINE       0     0     0
+            da0     ONLINE       0     0     0
+            da1     ONLINE       0     0     0
+            da2     ONLINE       0     0     0
+            da3     ONLINE       0     0     0
+            da4     ONLINE       0     0     0
+            da5     ONLINE       0     0     0
+            da6     ONLINE       0     0     0
+            da7     ONLINE       0     0     0
+            da8     ONLINE       0     0     0
+            da9     ONLINE       0     0     0
+            da10    ONLINE       0     0     0
+            da11    ONLINE       0     0     0
+            da12    ONLINE       0     0     0
+            da13    ONLINE       0     0     0
+            da14    ONLINE       0     0     0
+            da15    ONLINE       0     0     0
+            da16    ONLINE       0     0     0
+            da17    ONLINE       0     0     0
+            da18    ONLINE       0     0     0
+            da19    ONLINE       0     0     0
+            da20    ONLINE       0     0     0
+            da21    ONLINE       0     0     0
+            da22    ONLINE       0     0     0
+            da23    ONLINE       0     0     0
+
+###############################################################################
+
+24x 4TB, striped raid0, 90.4 TB,  w=692MB/s , rw=260MB/s , r=1377MB/s
+
+root@FreeBSDzfs: zpool create storage da0 da1 da2 da3 da4 da5 da6 da7 da8 da9 da10 da11 da12 da13 da14 da15 da16 da17 da18 da19 da20 da21 da22 da23
+
+root@FreeBSDzfs: bonnie++ -u root -r 1024 -s 16384 -d /storage -f -b -n 1 -c 4
+Version  1.97       ------Sequential Output------ --Sequential Input- --Random-
+Concurrency   4     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+FreeBSDzfs      16G           692351  95 260259  50           1377547  75  1921  19
+Latency                       12856us    1670ms             49017us   59388us
+
+root@FreeBSDzfs:  zpool status
+  pool: storage
+ state: ONLINE
+  scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        storage     ONLINE       0     0     0
+          da0       ONLINE       0     0     0
+          da1       ONLINE       0     0     0
+          da2       ONLINE       0     0     0
+          da3       ONLINE       0     0     0
+          da4       ONLINE       0     0     0
+          da5       ONLINE       0     0     0
+          da6       ONLINE       0     0     0
+          da7       ONLINE       0     0     0
+          da8       ONLINE       0     0     0
+          da9       ONLINE       0     0     0
+          da10      ONLINE       0     0     0
+          da11      ONLINE       0     0     0
+          da12      ONLINE       0     0     0
+          da13      ONLINE       0     0     0
+          da14      ONLINE       0     0     0
+          da15      ONLINE       0     0     0
+          da16      ONLINE       0     0     0
+          da17      ONLINE       0     0     0
+          da18      ONLINE       0     0     0
+          da19      ONLINE       0     0     0
+          da20      ONLINE       0     0     0
+          da21      ONLINE       0     0     0
+          da22      ONLINE       0     0     0
+          da23      ONLINE       0     0     0
+
+###############################################################################
+
+</pre>
+
+<h3>Solid State (Pure SSD) raids</h3>
+
+<p>The 24 slot raid chassis is filled with Samsung 840 256GB SSD (MZ-7PD256BW)
+drives. Drives are connected through an Avago LSI 9207-8i HBA controller
+installed in a PCIe 16x slot. TRIM is not used and not needed due to ZFS's copy
+on write drive leveling.</p>
+
+<pre class="code">
+1x 256GB  a single drive  232 gigabytes ( w= 441MB/s , rw=224MB/s , r= 506MB/s )
+
+2x 256GB  raid0 striped   464 gigabytes ( w= 933MB/s , rw=457MB/s , r=1020MB/s )
+2x 256GB  raid1 mirror    232 gigabytes ( w= 430MB/s , rw=300MB/s , r= 990MB/s )
+
+3x 256GB  raid5, raidz1   466 gigabytes ( w= 751MB/s , rw=485MB/s , r=1427MB/s )
+
+4x 256GB  raid6, raidz2   462 gigabytes ( w= 565MB/s , rw=442MB/s , r=1925MB/s )
+
+5x 256GB  raid5, raidz1   931 gigabytes ( w= 817MB/s , rw=610MB/s , r=1881MB/s )
+5x 256GB  raid7, raidz3   464 gigabytes ( w= 424MB/s , rw=316MB/s , r=1209MB/s )
+
+6x 256GB  raid6, raidz2   933 gigabytes ( w= 721MB/s , rw=530MB/s , r=1754MB/s )
+
+7x 256GB  raid7, raidz3   934 gigabytes ( w= 591MB/s , rw=436MB/s , r=1713MB/s )
+
+9x 256GB  raid5, raidz1   1.8 terabytes ( w= 868MB/s , rw=618MB/s , r=1978MB/s )
+10x 256GB raid6, raidz2   1.8 terabytes ( w= 806MB/s , rw=511MB/s , r=1730MB/s )
+11x 256GB raid7, raidz3   1.8 terabytes ( w= 659MB/s , rw=448MB/s , r=1681MB/s )
+
+17x 256GB raid5, raidz1   3.7 terabytes ( w= 874MB/s , rw=574MB/s , r=1816MB/s )
+18x 256GB raid6, raidz2   3.7 terabytes ( w= 788MB/s , rw=532MB/s , r=1589MB/s )
+19x 256GB raid7, raidz3   3.7 terabytes ( w= 699MB/s , rw=400MB/s , r=1183MB/s )
+
+24x 256GB raid0 striped   5.5 terabytes ( w=1620MB/s , rw=796MB/s , r=2043MB/s )
+
+</pre>
+
+
+<h3>Some thoughts on the RAID results...</h3>
+
+<p>Raid 6 or raidz2 is a good mix of all three properties. Good speeds,
+integrity and capacity. The ability to lose two drives is fine for a home or
+office raid where you can get to the machine in a short amount of time to put
+in another disk. For data center use raidz2 (raid6) is good if you have a hot
+spare in place. Otherwise, raidz3 (raid7) might be better for data center use
+as it might take an admin a week to get there to replace a disk. Of course, if
+you use raidz2 (raid6) with a hot spare you might as well use raid7. Raid 7
+would offer the same total amount of space and allow the raid to lose ANY three
+drives.</p>
+
+<p>We found that no matter which spinning hard drive we used, the speeds and
+latencies were about the same. You do not have the get the most expensive SAS
+drives like we used. Look for any manufacture which label their drives as RE or
+Raid Enabled or "For NAS systems." Some Western Digital Red 3TB (WD30EFRX) hard
+drives performed just as well. 7200 rpm drives are around 10 percent faster
+then 5400 rpm drives, but the 7200 rpm drives run hotter. We recommend staying
+away from power saving or ECO mode drives like the Western Digital Green
+(WD30EZRX) series. These green drives seem to perform poorly in a raid
+configuration due to their ability to spin down, go into sleep mode and long
+SATA timings. If you are looking for all out speed, the best performance
+increase you are going to get is to switch from spinning hard drives to SSDs
+and/or enable ZFS compression.</p>
+
+<p>Reliability of the pool is directly proportional to the number of disks,
+quality of the hardware and re-silver time. As the number of disks increase the
+reliability decreases because there is a higher chance for another disk to
+fail. Using enterprise SAS drives which have a higher meantime between failure
+should increase reliability compared to using desktop based personal drives.
+The longer the raid takes to resilver the higher the chance is another drive
+will fail during the re-silver process. To deal with the chance of pool failure
+with more disks we should increase the amount of parity disks. Higher parity
+count will reduce the MTTDL, Mean Time To Data Loss.</p>
+
+<p>Some Random Observations: Always use LZ4 compression and stick as much RAM
+as you can afford into the machine. When deciding how many drives to use, drive
+types do not matter, SAS or SATA are both fine. The more disks in a pool, less
+space lost to parity equals greater space efficiency. Hard drives die in
+batches; try to vary the manufacturing date of the drives or buy from different
+companies. In general, mirrors are better for random IOPs. IOPs do not seem to
+differ between raidz, raidz2 or raidz3.</p> 
+
+<h3>To compress, or not to compress, that is the question</h3>
+
+<p>Yes, enable LZ4 compression. The command "zfs set compression=lz4 tank" will
+enable compression on the "tank" pool. The long answer is also yes, and you
+want to be aware of the positives and negatives to make an informed
+decision.</p>
+
+<p>Spinning drives in general are really, really slow. The OS wastes a
+significant amount of time just waiting to get data to and from the hard
+drives. The main argument against compression on the fly is it uses CPU time
+when reading or writing to the array and also adds latency. If you have been
+using computers for a while you might remember "Stacker" from the 1990's.
+Ideally, we want the system to contact the drives as little as possible because
+they are so slow.</p>
+
+<p>Compression can reduce the amount of blocks the drive needs to access and
+the result is faster speeds at the cost of CPU time. What you gain is less
+blocks read or written to for even moderately compressible files meaning you
+have effectively increased the aerial density of the drive platters.
+Compression allows the drive heads to move over a smaller area to access the
+same amount of data.</p>
+
+<p>The developers of ZFS offer lz4 compression which is disabled by default.
+Take note that ZFS and compression use multiple CPU cores so the more cores and
+the faster they are the faster compression will be.  With LZ4 compression
+enabled, the system will use around 20% more CPU time to compress and
+uncompress files compared to handling raw data. On average lz4 will compress
+data to a maximum of 2x to 3x.</p>
+
+<p>In our tests we show single drive reads go from 150MB/sec to 1,174MB/sec of
+compressed Bonnie++ test data with lzjb. Even compressed files like bzip2, zip,
+mp3, avi, mkv and webm will not waste much CPU time as lz4 is a very
+inexpensive compression method.</p>
+
+<p>In FreeBSD 10 both lzjb and lz4 are available in ZFS. LZJB is fast, but LZ4
+is faster with 500MB/sec compression and 1.5GB/sec decompression speeds. This
+makes LZ4 50% faster on compression and 80% on decompression compared to LZJB.
+In FreeBSD 9.1 you may need to use "zpool set feature@lz4_compress=enabled
+poolname" to enable lz4 on your pool as lz4 is not backwards compatible with
+non-lz4 versions of zfs.</p>
+
+<p>LZ4's performance on incompressible data is equally impressive. LZ4 achieves
+higher performance by incorporating an "early abort" mechanism which triggers
+if LZ4 can not reach a minimum compression ratio of 12.5%. LZ4 is perfect for
+admins who would like to use compression as a default option for all pools.
+Enabling LZ4 on all volumes means compression will be used where appropriate,
+while making sure the algorithm will not waste CPU time on incompressible data
+and reads will not incur a latency penalty due to transparent decompression.
+Just incredible.</p>
+
+<p>The following table shows a few raid types without compression and then with
+lzjb and lz4 compression enabled. Bonnie++ tests use database like files which
+compress fairly well. You will notice as we add more physical disks,
+compression makes less of an impact on performance. In fact, with lz4
+compression we max out read and write speeds with only three disks in raidz
+(raid5). Our suggestion is to enabled compression on all arrays because the
+amount of throughput you gain outweighs the CPU usage and you get to compress
+data which can save space.</p>
+
+<p>
+<pre class="code">
+# The following Bonnie++ tests show the speeds of volumes with compression off
+# and then on with compression=lzjb and compression=lz4 of well compressed data.
+
+off   1x 2TB    a single drive  1.8 terabytes ( w=131MB/s , rw= 66MB/s , r= 150MB/s )
+lzjb  1x 2TB    a single drive  1.8 terabytes ( w=445MB/s , rw=344MB/s , r=1174MB/s ) 
+lz4   1x 2TB    a single drive  1.8 terabytes ( w=471MB/s , rw=351MB/s , r=1542MB/s ) 
+
+off   1x 256GB  a single drive  232 gigabytes ( w=441MB/s , rw=224MB/s , r= 506MB/s ) SSD
+lzjb  1x 256GB  a single drive  232 gigabytes ( w=510MB/s , rw=425MB/s , r=1290MB/s ) SSD
+
+off   2x 2TB    raid1  mirror   1.8 terabytes ( w=126MB/s , rw= 79MB/s , r= 216MB/s )
+lzjb  2x 2TB    raid1  mirror   1.8 terabytes ( w=461MB/s , rw=386MB/s , r=1243MB/s )
+lz4   2x 2TB    raid1  mirror   1.8 terabytes ( w=398MB/s , rw=354MB/s , r=1537MB/s )
+
+off   3x 2TB    raid5, raidz1   3.6 terabytes ( w=279MB/s , rw=131MB/s , r= 281MB/s )
+lzjb  3x 2TB    raid5, raidz1   3.6 terabytes ( w=479MB/s , rw=366MB/s , r=1243MB/s )
+lz4   3x 2TB    raid5, raidz1   3.6 terabytes ( w=517MB/s , rw=453MB/s , r=1587MB/s )
+
+off   5x 2TB    raid5, raidz1   7.1 terabytes ( w=469MB/s , rw=173MB/s , r= 406MB/s )
+lzjb  5x 2TB    raid5, raidz1   7.1 terabytes ( w=478MB/s , rw=392MB/s , r=1156MB/s )
+lz4   5x 2TB    raid5, raidz1   7.1 terabytes ( w=516MB/s , rw=437MB/s , r=1560MB/s )
+
+off   5x 256GB  raid5, raidz1   931 gigabytes ( w= 817MB/s , rw=610MB/s , r=1881MB/s ) SSD
+lzjb  5x 256GB  raid5, raidz1   931 gigabytes ( w= 515MB/s , rw=415MB/s , r=1223MB/s ) SSD
+
+off   7x 2TB    raid7, raidz3   7.1 terabytes ( w=393MB/s , rw=169MB/s , r= 423MB/s )
+lzjb  7x 2TB    raid7, raidz3   7.1 terabytes ( w=469MB/s , rw=378MB/s , r=1127MB/s )
+lz4   7x 2TB    raid7, raidz3   7.1 terabytes ( w=507MB/s , rw=436MB/s , r=1532MB/s )
+
+off   12x 2TB   raid5, raidz1   19  terabytes ( w=521MB/s , rw=272MB/s , r= 738MB/s )
+lzjb  12x 2TB   raid5, raidz1   19  terabytes ( w=487MB/s , rw=391MB/s , r=1105MB/s )
+lz4   12x 2TB   raid5, raidz1   19  terabytes ( w=517MB/s , rw=441MB/s , r=1557MB/s )
+
+off   17x 2TB   raid5, raidz1   28  terabytes ( w=468MB/s , rw=267MB/s , r= 874MB/s )
+lzjb  17x 2TB   raid5, raidz1   28  terabytes ( w=478MB/s , rw=380MB/s , r=1096MB/s )
+lz4   17x 2TB   raid5, raidz1   28  terabytes ( w=502MB/s , rw=430MB/s , r=1473MB/s )
+
+off   24x 2TB   raid5, raidz1   40  terabytes ( w=528MB/s , rw=291MB/s , r= 929MB/s )
+lzjb  24x 2TB   raid5, raidz1   40  terabytes ( w=478MB/s , rw=382MB/s , r=1081MB/s )
+lz4   24x 2TB   raid5, raidz1   40  terabytes ( w=504MB/s , rw=431MB/s , r=1507MB/s )
+
+off   24x 256GB raid0 stripe    5.5 terabytes ( w=1340MB/s , rw=796MB/s , r=2037MB/s ) SSD
+lzjb  24x 256GB raid0 stripe    5.5 terabytes ( w=1032MB/s , rw=844MB/s , r=2597MB/s ) SSD
+
+
+
+# The raw bonnie output  
+
+1x 2TB   a single drive  1.8 terabytes
+ # zfs set compression=lzjb tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  calomel.org     80G           445544  78 344412  67           1174294  80 285.9   3
+  Latency                        6118ms    5142ms               273ms     502ms
+
+1x 2TB   a single drive  1.8 terabytes
+ # zfs set compression=lz4 tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  zfsFBSD10       80G           471248  76 351900  61           1542189  88 14053 178
+  Latency                        8638ms    9357ms               720ms   44143us
+
+1x 256GB   a single drive  232 terabytes SSD
+ # zfs set compression=lzjb tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  zfsSSD          80G           510613  88 425359  81           1290425  86  9716 140
+  Latency                         509ms     553ms               277ms   13602us
+
+2x 2TB   raid1  mirror   1.8 terabytes
+ # zfs set compression=lzjb tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  calomel.org     80G           461530  83 386759  78           1243555  85 397.2  15
+  Latency                        5031ms    4847ms               276ms     304ms
+
+2x 2TB   raid1  mirror   1.8 terabytes
+ # zfs set compression=lz4 tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  zfsFBSD10       80G           398572  67 354963  64           1537069  90  1157  14
+  Latency                       10477ms    7119ms               795ms   76540us
+
+3x 2TB   raid5, raidz1   3.6 terabytes
+ # zfs set compression=lzjb tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  calomel.org     80G           479200  85 366110  75           1243482  87 260.8   3
+  Latency                        3580ms    3717ms               500ms     342ms
+
+3x 2TB   raid5, raidz1   3.6 terabytes
+ # zfs set compression=lz4 tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  zfsFBSD10       80G           517140  87 453732  82           1587063  95 899.5  10
+  Latency                         471ms     627ms               325ms   70999us
+
+5x 2TB   raid5, raidz1   7.1 terabytes
+ # zfs set compression=lzjb tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  calomel.org     80G           478755  87 392926  81           1156163  83 256.9   4
+  Latency                         807ms    1269ms               338ms     417ms
+
+5x 2TB   raid5, raidz1   7.1 terabytes
+ # zfs set compression=lz4 tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  zfsFBSD10       80G           516294  88 437536  80           1560222  93  1190  14
+  Latency                         522ms    2311ms               301ms   61362us
+
+5x 2TB   raid5, raidz1   931 gigabytes SSD
+ # zfs set compression=lzjb tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  zfsSSD          80G           515770  88 415428  79           1223482  85  9288 147
+  Latency                         495ms    1192ms             87411us   12334us
+
+7x 2TB   raid7, raidz3   7.1 terabytes
+ # zfs set compression=lzjb tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  calomel.org     80G           469870  86 378324  78           1127670  81 260.9   5
+  Latency                        1862ms    1055ms               210ms     371ms
+
+7x 2TB   raid7, raidz3   7.1 terabytes
+ # zfs set compression=lz4 tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  zfsFBSD10       80G           507960  88 436097  82           1532414  92 614.7  10
+  Latency                         509ms    1576ms               187ms   61843us
+
+12x 2TB  raid5, raidz1   19  terabytes
+ # zfs set compression=lzjb tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  calomel.org     80G           487671  87 391920  81           1105113  83 248.9   4
+  Latency                         503ms    1128ms               409ms     323ms
+
+12x 2TB  raid5, raidz1   19  terabytes
+ # zfs set compression=lz4 tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  zfsFBSD10       80G           517168  89 441478  81           1557655  93  1335  22
+  Latency                         462ms     847ms               267ms   61475us
+
+17x 2TB  raid5, raidz1   28  terabytes
+ # zfs set compression=lzjb tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  calomel.org     80G           478964  87 380927  80           1096636  82 280.7   5
+  Latency                        2051ms     802ms               179ms     363ms
+
+17x 2TB  raid5, raidz1   28  terabytes
+ # zfs set compression=lz4 tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  zfsFBSD10       80G           502536  88 430811  81           1473594  89  1217  14
+  Latency                         489ms     726ms               261ms   58670us
+
+24x 2TB  raid5, raidz1   40  terabytes
+ # zfs set compression=lzjb tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  calomel.org     80G           478082  87 382614  79           1081919  80 278.9   6
+  Latency                         990ms    1013ms               185ms     492ms
+
+24x 2TB  raid5, raidz1   40  terabytes
+ # zfs set compression=lz4 tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  zfsFBSD10       80G           504239  87 431002  81           1507097  90  1645  22
+  Latency                         514ms     844ms             58128us   43527us
+
+24x 2TB  raid0 stripe  5.5 terabytes SSD
+ # zfs set compression=off tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  calomel.org     80G           587993  97 359645  65           1040082  61  7410 108
+  Latency                         109ms     827ms               577ms   13935us
+
+24x 2TB  raid0 stripe  5.5 terabytes SSD
+ # zfs set compression=lzjb tank
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  calomel.org     80G         1032588  88 844972  82           2597192  85 10210 142
+  Latency                        538ms     571ms               235ms   14151us
+
+</pre>
+</p>
+
+
+<h3>All SATA controllers are NOT created equal</h3>
+
+<p>The performance of your RAID is highly dependent on your hardware and OS
+drivers. If you are using the motherboard SATA connectors, they are not going
+to perform as well as a SATA expander or a dedicated raid card. Just because
+the SATA port says SATA 6 and comes with fancy cables does not mean the port
+can move data quickly. The onboard chipsets are normally the cheapest silicon
+the manufacturer can get away with. This sentiment is true for most of the
+substandard on motherboard network ports too.</p>
+
+<p>On mailing lists and forums there are posts which state ZFS is slow and
+unresponsive. We have shown in the previous section you can get incredible
+speeds out of the file system if you understand the limitations of your
+hardware and how to properly setup your raid. We suspect that many of the
+objectors of ZFS have setup their ZFS system using slow or otherwise
+substandard I/O subsystems.</p>
+
+<p>Here we test the SATA throughput of the same physical Western Digital Black
+2TB SATA6 (WD2002FAEX) spinning hard drive and Samsung 840 PRO 256GB SSD on
+three(3) different interfaces using FreeBSD. We look at the SATA 6 Gbit/s port
+of a common gaming motherboard by Asus, a Supermicro server motherboard and an
+LSI MegaRAID raid card. All machines have at least a six(6) core CPU and 16 gig
+of ram.  According to Western Digital the Black series 2TB (WD2002FAEX) should
+be able to theoretically sustain 150MB/sec sequential read and writes. The
+Samsung 840 Pro is rated at 540MB/sec reads and 520MB/sec writes. Notice the
+throughput between motherboard based SATA ports (sata 3 versus sata 6) and a
+dedicated card.</p>
+
+<pre class="code">
+
+1x 2TB a single drive - 1.8 terabytes - Western Digital Black 2TB (WD2002FAEX)
+
+ Asus Sabertooth 990FX sata6 onboard ( w= 39MB/s , rw= 25MB/s , r= 91MB/s )
+ SuperMicro X9SRE sata3 onboard      ( w= 31MB/s , rw= 22MB/s , r= 89MB/s )
+ LSI MegaRAID 9265-8i sata6 "JBOD"   ( w=130MB/s , rw= 66MB/s , r=150MB/s )
+
+1x 256GB a single drive - 232 gigabytes - Samsung 840 PRO 256GB (MZ-7PD256BW)
+
+ Asus Sabertooth 990FX sata6 onboard ( w=242MB/s , rw=158MB/s , r=533MB/s )
+ LSI MegaRAID 9265-8i sata6 "JBOD"   ( w=438MB/s , rw=233MB/s , r=514MB/s )
+
+
+# The raw bonnie output on FreeBSD 9.1
+
+1x 2TB   a single drive  1.8 terabytes (Asus Sabertooth 990FX on board SATA6)
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  zfsASUS         80G           39139   11 25902  8            91764    8 122.1   2
+  Latency                       4015ms     3250ms              2263ms     443ms
+
+1x 2TB   a single drive  1.8 terabytes (Supermicro X9SRE on board SATA6)
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  zfsSuper        80G           31342   6 22420   4            89085    4 180.6   1
+  Latency                       4709ms    4699ms               1263ms     568ms
+
+1x 2TB   a single drive  1.8 terabytes (LSI MegaRAID 9265-8i JBOD SATA6)
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  calomel.org     80G           130325  23 66041  11           150329   8 144.8   6
+  Latency                       12251ms    5102ms              1381ms     611ms
+
+1x 256GB a single drive - 232 gigabytes (Asus Sabertooth 990FX on board SATA6)
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  calomel.org     80G           224826  42 158018  30           533094  38  3788  49
+  Latency                        3736ms    1422ms               652ms   26953us
+
+1x 256GB a single drive - 232 gigabytes (LSI MegaRAID 9265-8i JBOD SATA6)
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  calomel.org     80G           438424  70 233976  41           514946  29  3807  57
+  Latency                       70402us    1714ms               770ms   28608us
+
+</pre>
+
+
+<p>
+<div class="note">
+Want more speed out of FreeBSD ? Check out our <a
+href="/freebsd_network_tuning.html">FreeBSD Network Tuning</a> guide where we
+enhance 1 gigabit and 10 gigabit network configurations.
+</div>
+</p>
+
+
+<h3>How do I align sectors to 4K for a ZFS pool ?</h3>
+
+<p>By default, older hard drives have a sector size of 512 bytes. Sectors sizes
+changed when drives became large enough that the overhead of keeping track of
+sectors consumed a high percentage of storage space. Many modern drives are now
+specified as advanced format drives which means they have 4096 byte sector sizes
+(4KiB). Modern 4K drives includes all SSDs and most 2TB and above magnetic
+drives. You can check on the manufacture website for your drives "sector size"
+or "sector alignment".</p>
+
+<p>ZFS will query the underlying device to understand how large the sectors are
+and use this information to determine the size of its dynamic width stripes. A
+fine idea unless the hardware lies. Today, drive hardware lies more often than
+not. Drives claim to have a logical sector size of 512 bytes (ashift=9 or
+2^9=512) while the physical sectors are 4Kib (ashift=12 or 2^12=4096). Since
+the drive lied, ZFS will incorrectly make stripes aligned to 512 bytes. This
+means stripes will almost always be non-aligned forcing the underlying device
+to use internal processing time which will slightly degrade write performance.
+We say slightly because in practice a misaligned drive only writes less then
+10% slower then a properly aligned drive. Still, every byte per second counts
+right?</p>
+
+<p>So, we are forced to manually tell ZFS exactly how we want the sectors
+aligned since we can not trust the hardware to tell us the truth. The procedure
+is not hard, but it is a little abstract. Lets setup a single drive in the ZFS
+pool called "tank." Using gnop we can create .nop devices to force ZFS to align
+physical sectors to 4K no matter what the hard drives tell us.</p>
+
+<pre class="code">
+# Setting up a single drive ZFS pool called "tank" which is 4K aligned
+
+# If you already have an unaligned pool you need to
+# destroy it. Backup your data if need to.
+ zpool destroy tank
+
+# A 4K gnop device needs to be created which will be chained to the ZFS pool
+# This will create the "tank" pool with *.nop devices forcing ZFS to have 4K
+# physical sectors.
+ gnop create -S 4096 /dev/mfid0
+ zpool create tank /dev/mfid0.nop
+
+# Next, the pool needs to be exported and the temporary gnop
+# devices removed
+ zpool export tank
+ gnop destroy /dev/mfid0.nop
+
+# Now, the aligned pool can be imported from the "raw" devices
+ zpool import tank
+
+# All done. Query ZFS to make sure the ashift equals 12 which means this pool
+# is 4K aligned. If you see "ashift: 9" then you are 512b aligned.
+ zdb -C tank | grep ashift
+      ashift: 12
+</pre>
+
+
+
+<h3>Performance of 512b versus 4K aligned pools</h3>
+
+<p>So, what performance difference will I see for a properly aligned 4K sector
+sized ZFS pool? Truthfully, we did not see much difference with one or two
+spinning disks. Normally less then a 10% speed variation. With alignment you
+may see a slight increase in hard drive speeds and your setup will be more
+efficient because the hard drive itself will not have to do any sector
+splitting or read-modify-write operations.</p>
+
+<p>The performance difference seems to also depend on the type of drives you
+use. Green or ECO drives perform poorly even with 4K alignment compared to RE
+(Raid Enabled) drives. To make things more complicated some drives are simply
+slower then others even from the same manufacturer or family of drives. The
+only way to make sure you are getting the most out of your equipment is to
+format the drive as 512b and 4K and do the bonnie++ test on each. If you have
+many drives, test each one individually and put the "fast" ones in one raid and
+the "slower" ones in another. Mixing fast and slow drives will make the entire
+setup slow. It is a pain, we know, but the individual test method works
+reliably.</p>
+
+<p>For a a new boot drive or raid we still suggest aligning the sectors. If you
+have a unaligned drive and want to wipe the data and re-align, keep these
+numbers in mind, test your own equipment and make an informed decision.</p>
+
+<pre class="code">
+Western Digital Black 2TB (WD2001FYYG)
+ 512b 1x 2TB   a single drive  1.8 terabytes ( w=130MB/s , rw= 65MB/s , r=146MB/s )
+ 4K   1x 2TB   a single drive  1.8 terabytes ( w=131MB/s , rw= 66MB/s , r=150MB/s )
+
+Samsung 840 PRO 256GB (MZ-7PD256BW)
+ 512b 1x 256GB a single drive  232 gigabytes ( w=446MB/s , rw=232MB/s , r=520MB/s )
+ 4K   1x 256GB a single drive  232 gigabytes ( w=438MB/s , rw=233MB/s , r=514MB/s )
+
+##### 512 byte UN-aligned sectors Western Digital Black 2TB
+#
+# zdb -C tank | grep ashift
+                ashift: 9
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  calomel.org     80G           130463  23 65792  11           146863   8 120.6   1
+  Latency                       11645ms    4845ms              2505ms     353ms
+
+##### 4K aligned sectors Western Digital Black 2TB
+#
+# zdb -C tank | grep ashift
+                ashift: 12
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  calomel.org     80G           131335  23 66141  11           150777   9 148.2   5
+  Latency                       13651ms    5009ms              1189ms     625ms
+
+##### 512 byte UN-aligned sectors Samsung 840 PRO 256GB
+#
+# zdb -C tank | grep ashift
+                ashift: 9
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  calomel.org     80G           446299  71 232491  40           520952  30  1977  68
+  Latency                       96173us    1963ms               104ms   25309us
+
+##### 4K aligned sectors Samsung 840 PRO 256GB
+#
+# zdb -C tank | grep ashift
+                ashift: 12
+  Version  1.96       ------Sequential Output------ --Sequential Input- --Random-
+  Concurrency   1     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+  Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+  calomel.org     80G           438424  70 233976  41           514946  29  3807  57
+  Latency                       70402us    1714ms               770ms   28608us
+
+</pre>
+
+
+<div class="note">
+Your firewall is one of the most important machines on the network. Keep the
+system time up to date with <a href="/ntpd.html">OpenNTPD "how to"
+(ntpd.conf)</a>, monitor your hardware with <a
+href="/smart_hd_status.html">S.M.A.R.T. - Monitoring hard drive health</a>
+and keep track of any changed files with a custom <a
+href="/ids_mtree.html">Intrusion Detection (IDS) using mtree</a>. If you
+need to verify a harddrive for bad sectors check out <a
+href="/badblocks_wipe.html">Badblocks hard drive validation/wipe</a>.
+</div>
+
+<h2>Questions?</h2>
+
+<p><b>Do you have a ZFS Health Script we can use ?</b></p>
+
+<p>Take a look at our <a href="/zfs_health_check_script.html">ZFS Health
+Check and Status script</a>. The script checks disk and volume errors as well as
+the health of the pool and even when the last zpool scrub was done.</p>
+
+
+<p><b>Why is ZFS import not using GPT labels ?</b></p>
+
+<p>When importing a volume you must point ZFS to the directory with the GPT
+labels using the "-d" argument. For example our GPT labels start with data1-XX
+and under Ubuntu the device labels are in /dev/disk/by-partlabel/ .</p>
+
+<pre class="code">
+# import pool with GPT labels on Ubuntu for example.
+
+root@zfsRAID:~#   zpool import -d /dev/disk/by-partlabel/ data1
+
+root@zfsRAID:~#   zpool status
+  pool: data1
+ state: ONLINE
+  scan: scrub repaired 0 in 0h0m with 0 errors on Mon Apr  8 14:36:17 2033
+config:
+
+        NAME          STATE     READ WRITE CKSUM
+        data1         ONLINE       0     0     0
+          raidz2-0    ONLINE       0     0     0
+            data1-00  ONLINE       0     0     0
+            data1-01  ONLINE       0     0     0
+            data1-02  ONLINE       0     0     0
+            data1-03  ONLINE       0     0     0
+            data1-04  ONLINE       0     0     0
+            data1-05  ONLINE       0     0     0
+            data1-06  ONLINE       0     0     0
+            data1-07  ONLINE       0     0     0
+            data1-08  ONLINE       0     0     0
+            data1-09  ONLINE       0     0     0
+            data1-10  ONLINE       0     0     0
+            data1-11  ONLINE       0     0     0
+
+
+# If you do a straight zpool import ZFS will mount the drives with the
+# raw device names which we do not want.
+
+root@zfsRAID:~#   zpool import data1
+root@zfsRAID:~#   zpool status
+  pool: data1
+ state: ONLINE
+  scan: resilvered 0 in 0h0m with 0 errors on Mon Apr  8 14:33:58 2033
+config:
+
+        NAME                                              STATE     READ WRITE CKSUM
+        data1                                             ONLINE       0     0     0
+          raidz2-0                                        ONLINE       0     0     0
+            scsi-3600605b00512e8c018f5abe327b8d44f-part1  ONLINE       0     0     0
+            scsi-3600605b00512e8c018f5abe427c0c540-part1  ONLINE       0     0     0
+            scsi-3600605b00512e8c018f5abe427c9410f-part1  ONLINE       0     0     0
+            scsi-3600605b00512e8c018f5abe527d1dc47-part1  ONLINE       0     0     0
+            scsi-3600605b00512e8c018f5c8456d9cb386-part1  ONLINE       0     0     0
+            scsi-3600605b00512e8c018f5abe627e2e502-part1  ONLINE       0     0     0
+            scsi-3600605b00512e8c018f5abe627eb60b9-part1  ONLINE       0     0     0
+            scsi-3600605b00512e8c018f5abe727fa267a-part1  ONLINE       0     0     0
+            scsi-3600605b00512e8c018f5abe82802c19f-part1  ONLINE       0     0     0
+            scsi-3600605b00512e8c018f5abe92811a6f3-part1  ONLINE       0     0     0
+            scsi-3600605b00512e8c018f5abea28205d1e-part1  ONLINE       0     0     0
+            scsi-3600605b00512e8c018f5abeb282e7776-part1  ONLINE       0     0     0
+</pre>
+
+
+<hr>
+
+</div>
+
+<div class="boxiconbottom">
+
+<a href="/calomel_at.html"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAEQkAABEJABiazSuAAAAAd0SU1FB94DBhMdKSWVG6oAAAUvSURBVGje7ZlfiFZFGMZ/z3GtXSsQhYSUvMmrYiEkMSIMo0wzUKu1oKBSCDKkIAlSzjBDXiRRYRh0U2SQZK1G/w26qIx2A1GMUpAuoogukgQLV9bt6cKZPK677a647Sfse/Wd882Zef88877POwOTMimTMikTKQKo65qU0r8vQwiyrRbT1Skll4eis0IIxBjLy6WSFgIzbUtqDRtsI8nAUds9KaVPsqNPRyCEMN32e5IWAB3ND1sCJmc78gTwLbAixnhMdV1Pk7QLWAK4wKqFpei4B1hVAcuBJdnbuhj2bdZ1CbC8AtZfdJknQ8r2+krSfNsDkvoGhakVoYNtbPcBA5LmV0C7pH7bh2x/0MBYKxnhnNb/Bj6QdBjot91eZUXbgU5Jc4FV2Ri1QDR8BjX6wfY9wFzbndnxrsrGlVQBncBLkpZJWgv83HSB/4e86jNSnn8G1gLLJb0oqbNRoFQNqsrOFh4GpgKdtjfYPpI/Gm9oOXtbko4AGyR12p5q+xAwd3CqbxuCWljSpcA2YBFwP/AG8Iik5xpGaJyUx/bTwGvA75J2SOoCqqHWrYbjRznf3ifpO0mXxBi3ADNsdwN9DTT5AmCcPGc3MCOltEXSVEnf2b6vqdM5yoYQPIqqdxR4LMa4M1OPhbYfk/TgBfL+m8ArMcaePH8X8Aowc6RoV6Ngq84T7ajr+gWAGGOPpDW2rwW+HGP9cINnfWn7WttrivJ5jR2ZUI4I1ZEiMFQ0vgDujjEebVDbu4HngTmS2nIyoWQLn6a2BZangF8kPRVj7G5Q+BnArrzvRr3HqjGEWVmXRcDeuq5vKZQ2pdQtaZ6kx4GDmYqX6FlS6S8OSnpc0rwYY3cIoSi/CNg7VuXHGoEmNy+b7tmU0uZmQxRCuML2SknbgMvz+D+BdcDuGOPxZkMSQthoe5Ok9vPZPNVYPzjtzNN8RNI7wFndHHA8pbTd9ixgu6TttmfFGLcDx8ugxjfvSjp5vhltrBEo4f0JuDPG+H325qXAspTS7gKr0uU1MN7s/FYCH6eUTubn6yR9BFw9nhAq4/6yfXNK6UBe/BpJu4F5wGe2V6eUTjQVLr9DCB22dwK3AUeAFSmlH/OY621/JWnacDn/vA1opLMTwE0ppf0hhDbgDts7JXU0PNcHrAI+izEOZOWmALcDu2y3ZxhK0gmgy/anKaVTIYTrga9td+QeWBfCgDLRb7ZXpJR6QwhXAZuBhwaNcemYJL0NbMq/NwNdQ43N714HNsUYf63reqGk94BZo4FTNZqsA5wE7k0p9dZ1vRDotf3QoOg0uRTAaqBHUk/2MoMUahLDh4HeEMKClFIPcC9wcjTktxoJ85JOAUtjjHtDCBslfZMLVvlfw3ApcgWf2WgDhxtrYI7t3hDCMzHGr2wvy2v/Z3YaCUJ/2F6WWeGrwOJmkzFOLaMkfQ48ClwJfAxMH2sEDPQDK4EbgP3A4sbJxXicXqgR0FuBA8D8rEP/cM1UNVTCsd0PPAF0Sdoq6bIhDpjGuzO7DHgZuAd4MvftDDakbVBmkKSjtt8HHgBuHCe4jKbilzXXAd8Ab0m6q+yponNbpgTt2eoBSX2SVtueVjbqBB54FYffKKkTOAYMAFNKzamAfWWwpCnAbGBaI2tM5Gld6Y8LpGZn5Ytj91XA1gn28vkc8JaHrZWkD4E9jULT6lJgtQf4sFxwTM/le4HtjmGsntD7gebxuqRvM605dtFdcAA9McZzLjjO4u91XatltG/gpnnFNFTPMSmTMimT8v/LP3oN170fxuN4AAAAAElFTkSuQmCC" alt="Contact Us" title="Contact Us" height="48" width="48"></a>
+<a href="https://encrypted.google.com/search?&q=site%3Acalomel.org&btnG=Search"><img src="data:image/png;base64,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" alt="Google Site Search" title="Google Site Search" height="48" width="48"></a>
+<a href="/calomel_rss.xml"><img src="data:image/png;base64,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" alt="RSS Feed" title="RSS Feed" height="48" width="48"></a>
+<a href="https://profiles.google.com/101623135720127712698?rel=author"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAEQkAABEJABiazSuAAAAAd0SU1FB94DBhMrNbiI1pAAAAa2SURBVGjexZp5bBVVFMZ/b7EggqFqIMa4gUZEjf1LFJU8lLgQMBIp/mEQqIEgIKkad42fRA0uUdwAkWo0cQE3NCEuQGyAuiRGGjWCiESxihilQKsofe3zD88k1+udedPSVyd5ecvMvfOdc7577nfOvAx9dEjKAUcCNcA4YBiQA1qADfb6RVKnpGhM2XmzFQYdvQ8HFgFfAO8BNwFXAJcD84AVwFZgqaRT0gCPjkwlwdvrAmCleR+gVObeO4FpktZEc/wvBpgRk4FXHeBp77cPGCVpSzkjMhX0/HTgWe9eSUaUvGu+AUZI6uqzNeCAn2zgMwHwXcBS4CJgLLAgAL4EnGzn+jwCEW1KgXttASZI+tYbMwT4EBjuRWQXcJykjopGwMk20yyj+As1A6wFzpH0retRi9gvwHXAH97UhwGjKkqhAG2yAdqsBaZI2uMvSufzO0CrZ3w/4IS+MGCi0aYj4PlmoFZSaxyfHaP2erTOAQMqbcBgYCAwAbgauBl4DSgC64CxkefLURAY5J3qBH5Pun++F7i/R9LL3u/9gGOBXZLa0mxIks4DBnup9i9gR68a4IHJAQMNcM48dgBol7QtcH3c+ukHzA9EYB+wqdco5NwwL6kWWAZ8AHwFbLc02QgskzQpyQDv9weBWi+FArwlqT0pevkegB9uHB8JVHmX9QeqgTOBqyQ1AxdJ2huXfSStAKYEdFIRuKFXxZyk8cDqlNomOr/bdM02zxGHAA8bdUJzTZK06qC1UEDbhDSN+z30+QXgGqDoeP4xAx8y+gHg1jQ1QT4l+FqgIUGQub9nAjvx0UCVpGIMbdzxSyXd2mv1gIFfGaNtfgIeAR6X1GG0uB64y/aG6FgA3A2Uo81SSdd2pyLLpKBNQ4yqXAPUSWoJjK8xCgwFmoCFlk2SaPOYpPrugA+mUQf8FAOfjQF/paQWSdWSzvLGNwNTgYnAnQZ+hQO+5IFfIqk+sDP3OAJTPFWJp20Klhqn2gLFss0lwKeSSs5cR9mirIuhzRJJc7rr+f8Y4Hh+BrA8hjZrgckGfpDtlK4n9wEvmZGdwEnAZcCpvUmb/2QhjzbLjTalGEm818YeH8gihwOzDXzJyXKlgDN6TJu4CIwzbifSxqNaC3BMynu59Fksaa7v+TSiL7iITR68EjAs8nzEed9bF5hxvobxgUfgO4CbXfAxsjo9hSRlgXrr28TSxvWOQ7mtksYAt9krkxDl1ZaFtgf00GjLWqNNS0X9ofXAs5I2x0UoYwX1F8AQL9SbgdGS9qSohSNJPBO42DoKWdPy64HnJX3vGZ8DCqZohwWi6DpjIzAH+FJSyTUkI+li4F2Po53ASZK+S6Pne6BoBwKPAzPKCEPfmPuBO9z5stZoJZCbvysH0JXEkmbGXJP1DBhoNUM58AS01e3AShdTRtIbwCRv4DhJ61J40tU2EZgNwNcWxU8lNTjG5owydTGKtuR5PRuTyR6UdEuUhUKK9EDKktIHnwHG2FoAeM4xFuvE1cWogP3m4fnAXODRmIiUgHqrockCPwQuHJfUArH3lQHwJSfPXxvoay5LSLd/AQ2SFkt6Gng9YTlVAbMlVeUt5HO8C+6yiXb5XpfU36lh3Rog8lDcJjUaOLEM53Nl6nV37HigOmtp7vfARU2SLvXAjwFetDYgXuWFaZu5MTvr1MCYP6wb1wrsscZvdBSBP+3cbqOYO7YaGJm3BuorVvK5PIuK91ZJbdanrHYKlVIabeMYcG7AmwtMsucM/G/O+c+ctuIBe6pzmzfH2Xl7JvWwheRoL0wDgEMDnvYXVhpJPDhQL7dJ+jUmWXSYc6Pv7YHdfWjWwrwFmG5yOOMBzQQ+u0AWHoSe7yzTaix7rSun35c0CnjbpEDSs6yobzMZeCulGPvZ2o3uHCdLOscWbBH4zGprrN6oMWp1eHIjOr7PunnaIjECuNfC1278K9p7G/AjsNhaimnBY8nCpWEWuNEebGy03fkI5/oaG7MR+ASYFaDwx/nA7tplafQee7hwvK2F/SbONkV87KYWajDAccd+73tXmRJ4J7A1n6Aui9ZRaEpSod0QcpslNVk2Cu0FJU8BdJSZchXQWtHHrAEjzgA+T4jAIqNtp3F+VkK78kJJzZk+BB9R4D7L53HtSFK0LOdJekrSv7buih6NjY00NjZSKBTWAacDp1H+qX0ohc+X9CRAoVCo7H8lEtZOLfCQ8Tzjyem4YzcwV9IT7hrs0zUQSBTnWxtmvO3UcfvHm8AzkjYd1POBChlUZfn/VEvbkZzZAXzEP/9iaZXUFcp+fwNe3piy+IgH6wAAAABJRU5ErkJggg==" alt="Google+" title="Google+" height="48" width="48"></a>
+
+</div>
+
+</body>
+</html>
