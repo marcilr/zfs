@@ -1,0 +1,157 @@
+zfs.txt
+Created Mon Nov  2 16:42:54 AKST 2009
+by Raymond E. Marcil <marcilr@gmail.com>
+
+
+ZFS - Zettabyte File System
+
+
+ZFS is a combined file system and logical volume manager designed by
+Sun Microsystems.  The features of ZFS include protection against data
+corruption, support for high storage capacities, integration of the concepts
+of filesystem and volume management, snapshots and copy-on-write clones,
+continuous integrity checking and automatic repair, RAID-Z and native NFSv4
+ACLs. 
+wikipedia.org/wiki/ZFS
+
+
+Deduplication
+=============
+ZFS provides block-level deduplication because this is the finest granularity
+that makes sense for a general-purpose storage system.  Block-level dedup also
+maps naturally to ZFS's 256-bit block checksums, which provide unique block
+signatures for all blocks in a storage pool as long as the checksum function
+is cryptographically strong (e.g. SHA256).
+
+
+How do I mount the file system?
+===============================
+A mountable dataset will be created and automatically mounted when you first create the pool with
+zpool create.  Additional datasets can be created with zfs create and they will be automatically
+mounted.
+
+zfsonlinux.org/faq.html
+
+
+ZFS - The Last Word in File Systems
+===================================
+Reader Raharazod suggests forgoing a RAID array and using ZFS - a file system
+and logical volume manager - instead:
+
+To be honest, after doing a lot of research into RAID arrays, I decided it was
+too scary.  If a hardware RAID card dies, you lose all your data.  If your
+motherboard in a software RAID array dies... you lose all your data.
+
+Not to mention, as disk sizes grow to 2TB, there is a relatively high chance
+of unrecoverable failure for sectors. This can again cause you to lose all
+your data.  Upwards of 30% chance of complete data loss.  Too high of a risk
+for me.
+
+Solution?  Well, it's not the best option now, but I ended up using a linux
+distro with ZFS (alternatively BTRFS is now included in the linux kernel and
+individually you can evaluate its stability for your use).
+
+The reasoning? ZFS is entirely software based... and if one drive in a ZFS
+pool dies, you can recover your data.  It also does checksumming, so while
+you're writing your data, it checks to make sure it's valid, and if it's not,
+repairs it from the data parity. Plus, because it's software, it can be (and I
+have) transported in its entirety to a different machine.  To boot ZFS also
+allows you to dynamically add and remove disks from an array.  It's really
+working out well for me.  Once I set it up, I haven't had to mess with it
+since.  Granted, it's not as fast as a native filesystem (it's running through
+FUSE), but for media storage, it's plenty fast enough.
+
+Raharazod's full explanation, which goes into more specific detail about the
+exact setup.
+
+lifehacker.com/#!5660551
+
+
+Raharazod promoted by psychiccheese
+10 Oct 2010 1:32 AM
+
+So I actually did this not too long ago.
+
+To be honest, after doing a lot of research into RAID arrays, I decided it was
+too scary. If a hardware RAID card dies, you lose all your data.  If your
+motherboard in a software RAID array dies... you lose all your data.
+
+Not to mention, as disk sizes grow to 2TB, there is a relatively high chance
+of unrecoverable failure for sectors.  This can again cause you to lose all
+you data. Upwards of 30% chance of complete data loss. Too high of a risk
+for me.
+
+Solution?  Well, it's not the best option now, but I ended up using a linux
+distro with ZFS (alternatively BTRFS is now included in the linux kernel and
+individually you can evaluate it's stability for your use).
+
+The reasoning? ZFS is entirely software based... and if one drive in a ZFS
+pool dies, you can recover your data.  It also does checksumming, so while
+you're writing your data, it checks to make sure it's valid, and if it's not,
+repairs it from the data parity.  Plus, because it's software, it can be (and
+I have) transported in it's entirety to a different machine.  To boot ZFS also
+allows you to dynamically add and remove disks from an array.  It's really
+working out well for me. Once I set it up, I haven't had to mess with it since. 
+Granted, it's not as fast as a native filesystem (it's running through FUSE),
+but for media storage, it's plenty fast enough.
+
+To top it off, the box I built has HDMI, Wireless N, and 2 gigabit connections
+on an entirely gigabit network.  It's faster to mount CD images over the
+network than directly, and movies, music, and all of it are in one handy
+location. Install Rygel on your distro of choice and DLNA streaming sends all
+your media (transcoding included) to your favorite PS3, XBox, networked TV, or
+even your nifty networked DVD player. It can push media to 3 family computers,
+and our TV in the bedroom without breaking a sweat.
+
+All in all, I think it cost me about $800, but prices have come down since
+then, and with 4x2TB drives, I have a total usable array of just over 7TB.  So
+if you really need 8, make it 5x2TB or 3/4x3TB.
+
+Everyone will say good hardware is important, but if you want truly reliable
+drives (corporate quality) you're looking at spending twice the price.  More
+on higher capacity drives.
+
+That's my input.
+
+- Max (Edit comment) 
+
+lifehacker.com/#!5657829/
+
+
+Linux
+=====
+Porting ZFS to Linux is complicated by the fact that the GNU General Public
+License, which governs the Linux kernel, is incompatible with the Sun CDDL
+under which ZFS is distributed.  A single derived work of both projects cannot
+be legally distributed, as it is not possible to simultaneously meet both
+licenses' requirements.[42]
+
+One solution to this problem is to port ZFS to Linux's FUSE system so the
+filesystem runs in userspace instead, where it is not considered a derived
+work of the kernel. A project to do this was sponsored by Google's Summer of
+Code program in 2006, and is in a bugfix-only state as of March 2009.[43]  The
+ZFS on FUSE project is available here. Sun Microsystems has stated that a
+Linux port is being investigated.[44]  It is also possible to emulate Linux in
+a Solaris Zone and thus the underlying filesystem would be ZFS (though ZFS
+commands would not be available inside the Linux zone).[45]  It is also
+possible to run the GNU userland on top of an OpenSolaris kernel, as done by
+Nexenta.
+
+wikipedia.org/
+
+
+
+Links
+=====
+Raharazod's full explanation, which goes into more specific detail about the exact setup.
+http://lifehacker.com/#!5657829/whats-the-best-way-to-safely-store-terabytes-of-data-on-the-cheap?comment=30517456:30517456
+
+ZFS - The Last Word in File Systems
+http://lifehacker.com/#!5660551/your-best-solutions-for-massive-multi+terabyte-storage
+
+ZFS
+From Wikipedia, the free encyclopedia
+http://en.wikipedia.org/wiki/ZFS
+
+ZFS on Linux
+http://zfsonlinux.org/faq.html#HowDoIInstallIt
