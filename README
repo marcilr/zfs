@@ -16,3 +16,7 @@ deduplication
 
 links.txt
   ZFS related links
+
+packages.txt
+  ZFS related packages
+
