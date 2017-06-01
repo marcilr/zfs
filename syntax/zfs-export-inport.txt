@@ -1,0 +1,80 @@
+zfs-export-inport.txt
+Created Sat Sep 26 10:57:56 AKDT 2015
+Copyright (C) 2015 by Raymond E. Marcil <marcilr@gmail.com>
+
+
+Exporting Storage Pools
+
+
+When the migration is ready to take place, before unplugging the power, you need to export the
+storage pool.  This will cause the kernel to flush all pending data to disk, writes data to the
+disk acknowledging that the export was done, and removes all knowledge that the storage pool
+existed in the system.  At this point, it's safe to shut down the computer, and remove the drives.
+
+If you do not export the storage pool before removing the drives, you will not be able to import
+the drives on the new system, and you might not have gotten all unwritten data flushed to disk.
+Even though the data will remain consistent due to the nature of the filesystem, when importing,
+it will appear to the old system as a faulted pool.  Further, the destination system will refuse
+to import a pool that has not been explicitly exported.  This is to prevent race conditions with
+network attached storage that may be already using the pool.
+
+To export a storage pool, use the following command:
+  # zpool export tank
+
+This command will attempt to unmount all ZFS datasets as well as the pool. By default, when
+creating ZFS storage pools and filesystems, they are automatically mounted to the system.
+There is no need to explicitly unmount the filesystems as you with with ext3 or ext4.  The export
+will handle that.  Further, some pools may refuse to be exported, for whatever reason.  You can
+pass the "-f" switch if needed to force the export
+
+
+Importing Storage Pools
+-----------------------
+Once the drives have been physically installed into the new server, you can import the pool.
+Further, the new system may have multiple pools installed, to which you will want to determine
+which pool to import, or to import them all.  If the storage pool "tank" does not already exist on
+the new server, and this is the pool you wish to import, then you can run the following command:
+
+# zpool import tank
+# zpool status tank
+ state: ONLINE
+ scan: none requested
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        tank        ONLINE       0     0     0
+          mirror-0  ONLINE       0     0     0
+            sde     ONLINE       0     0     0
+            sdf     ONLINE       0     0     0
+          mirror-1  ONLINE       0     0     0
+            sdg     ONLINE       0     0     0
+            sdh     ONLINE       0     0     0
+          mirror-2  ONLINE       0     0     0
+            sdi     ONLINE       0     0     0
+            sdj     ONLINE       0     0     0
+
+errors: No known data errors
+
+
+Your storage pool state may not be "ONLINE", meaning that everything is healthy.  If the system
+does not recognize a disk in your pool, you may get a "DEGRADED" state.  If one or more of the
+drives appear as faulty to the system, then you may get a "FAULTED" state in your pool.  You will
+need to troubleshoot what drives are causing the problem, and fix accordingly.
+
+You can import multiple pools simultaneously by either specifying each pool as an argument, or by
+passing the "-a" switch for importing all discovered pools.  For importing the two pools "tank1"
+and "tank2", type:
+
+# zpool import tank1 tank2
+For importing all known pools, type:
+
+# zpool import -a
+
+pthree.org/2012/12/10/zfs-administration-part-v-exporting-and-importing-zpools/
+
+
+
+Links
+=====
+ZFS Administration, Part V- Exporting and Importing zpools
+https://pthree.org/2012/12/10/zfs-administration-part-v-exporting-and-importing-zpools/
