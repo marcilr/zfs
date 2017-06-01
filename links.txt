@@ -1,0 +1,75 @@
+links.txt
+Created Tue Sep 10 12:43:02 AKDT 2013
+Copyright (C) 2013 by Raymond E. Marcil <marcilr@gmail.com>
+
+
+ZFS related links
+
+
+Links
+=====
+2.13 Deduplication
+ZFS
+From Wikipedia, the free encyclopedia
+http://en.wikipedia.org/wiki/ZFS#Deduplication
+
+Destroying ZFS Storage Pools
+Oracle Solaris ZFS Administration Guide
+http://docs.oracle.com/cd/E19253-01/819-5461/gammr/index.html
+
+File systems, Data Loss and ZFS
+September 11, 2014 by Richard Yao
+https://clusterhq.com/blog/file-systems-data-loss-zfs/
+
+Simple ZFS Mirrored file system
+Posted on 04/05/2013 by Phillip Cooper
+http://phillipcooper.co.uk/2013/05/simple-zfs-mirrored-file-system/
+
+The State of ZFS on Linux
+ZFS on Linux (ZoL) is stable and is ready to handle
+many of the workloads ZFS handles on other platforms.
+http://clusterhq.com/blog/state-zfs-on-linux/
+
+ZFS
+From Wikipedia, the free encyclopedia
+http://en.wikipedia.org/wiki/ZFS
+
+ZFS - archlinux
+https://wiki.archlinux.org/index.php/ZFS
+
+ZFS Deduplication
+by bonwick on Nov 01, 2009
+Great detail on deduplication theory here.
+Solid info on byte-level, block-level, and file-level.
+https://blogs.oracle.com/bonwick/entry/zfs_dedup
+
+ZFS FAQ
+http://zfsonlinux.org/faq.html
+
+ZFS Filesystem for FUSE/Linux
+http://www.wizy.org/wiki/ZFS_on_FUSE
+
+ZFS Gets Built-In Deduplication
+http://tech.slashdot.org/story/09/11/02/2117206/ZFS-Gets-Built-In-Deduplication?art_pos=2
+
+ZFS on linux
+Very useful page
+The native Linux kernel port of the ZFS filesystem.  To get started with ZFS on Linux simply
+download the latest release and install using the directions for your distribution.
+Debian jessie 8.1 has packages:
+  libguestfs-zfs - guest disk image management system - ZFS support
+  parted - disk partition manipulator
+  simplesnap - Simple and powerful network transmission of ZFS snapshots
+  zfs-fuse - ZFS on FUSE
+  zfsnap - Automatic snapshot creation and removal for ZFS
+http://zfsonlinux.org/
+
+ZFS: To Dedupe or not to Dedupe...
+Submitted by constant on Wed, 2011-07-27 16:26
+http://constantin.glez.de/blog/2011/07/zfs-dedupe-or-not-dedupe
+
+ZFSOnLinux (ZoL)
+The native Linux kernel port of the ZFS filesystem.  To get started with ZFS
+on Linux simply download the latest release and install using the directions
+for your distribution.
+http://www.zfsonlinux.org/
