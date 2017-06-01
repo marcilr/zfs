@@ -1,0 +1,15 @@
+TODO
+Created Sun Jul 19 08:39:58 AKDT 2015
+Copyright (C) 2015 by Raymond E. Marcil <marcilr@gmail.com>
+
+
++++ Thu Jun  1 11:09:05 AKDT 2017 - Build new freenas box with SSDs,
+running ZFS for storage in garage rack.
+
+
+Complete
+========
+x Thu Jun  1 11:08:42 AKDT 2017 - Deprecated no longer need this one.
+
+Sun Jul 19 08:39:58 AKDT 2015 - Need to install debian and create large
+ZFS partition for backups on new 8TB Seagate ST8000AS0002 drive.
