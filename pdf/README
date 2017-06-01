@@ -5,6 +5,12 @@ Copyright (C) 2017 by Raymond E. Marcil <marcilr@gmail.com>
 
 Filelist
 ========
+zfs_raid_speed_capacity.html 
+  ZFS Raidz Performance, Capacity and Integrity
+  comparing speed, space and safety per raidz type
+  Great details of raidz levels and such.
+  https://calomel.org/zfs_raid_speed_capacity.html
+
 zfs_raid_speed_capacity.pdf
   ZFS Raidz Performance, Capacity and Integrity
   comparing speed, space and safety per raidz type
