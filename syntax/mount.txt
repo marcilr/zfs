@@ -1,0 +1,239 @@
+mount.txt
+Created Sat Sep 26 10:02:35 AKDT 2015
+Copyright (C) 2015 by Raymond E. Marcil <marcilr@gmail.com>
+
+
+Mount zfs partition
+
+
+Sep 26 10:02:35 AKDT 2015
+=========================
+Working on mounting the 8TB Seagate ST8000AS0002 drive with backup for
+bornite's raid6 on htpc.
+
+
+o Mount the zfs partition to /usr/local/backups:
+htpc:~# ls -lh /dev/disk/by-id/scsi-SATA_ST8000AS0002-1N_Z8404JEE-part4
+
+
+o Create mount point:
+# mkdir /usr/local/backups
+# chown root:users /usr/local/backups
+# chmod 775 /usr/local/backups
+# chmod g+ws /usr/local/backups
+
+NOTE: Existed on htpc from prior bornite mount did not have to recreate.
+      Did have to changed ownership from sshfs:sshfs to desired root:users
+
+o Export a storage pool on malachite:
+malachite:~# zpool export backups   <=== 'backups' taken from mount
+malachite:~#                              command output.
+
+malachite:~# mount | grep zfs
+kstat on /zfs-kstat type fuse (rw,nosuid,nodev,relatime,user_id=0,\
+group_id=0,allow_other)
+malachite:~#
+
+Export was easy peasy.  backups no longer mounted on
+/usr/local/backups
+
+o Inspect /usr/local/backups mount on malachite:
+malachite:~# mount | grep zfs
+kstat on /zfs-kstat type fuse \
+(rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other)
+backups on /usr/local/backups type fuse.zfs \
+(rw,relatime,user_id=0,group_id=0,default_permissions,allow_other)
+malachite:~# 
+
+o Am getting minor error in dmesg:
+[    8.483376] zfs-fuse (2353): /proc/2397/oom_adj is deprecated, \
+please use /proc/2397/oom_score_adj instead.
+
+
+o Inspect drives under /dev/disk/by-id/
+htpc:~# ls -lh /dev/disk/by-id/
+total 0
+...
+lrwxrwxrwx 1 root root  9 Sep 26 10:26 scsi-SATA_ST8000AS0002-1N_Z8404JEE -> ../../sdc
+lrwxrwxrwx 1 root root 10 Sep 26 10:26 scsi-SATA_ST8000AS0002-1N_Z8404JEE-part1 -> ../../sdc1
+lrwxrwxrwx 1 root root 10 Sep 26 10:26 scsi-SATA_ST8000AS0002-1N_Z8404JEE-part2 -> ../../sdc2
+lrwxrwxrwx 1 root root 10 Sep 26 10:26 scsi-SATA_ST8000AS0002-1N_Z8404JEE-part3 -> ../../sdc3
+lrwxrwxrwx 1 root root 10 Sep 26 10:26 scsi-SATA_ST8000AS0002-1N_Z8404JEE-part4 -> ../../sdc4
+...
+htpc:~#
+
+
+o Restart htpc to test /sbin/zfs-fuse startup.
+
+The /sbin/zfs-fuse daemon did load on startup:
+
+htpc:~$ ps ax | grep [z]fs
+ 2354 ?        Ssl    0:00 /sbin/zfs-fuse --pidfile /var/run/zfs-fuse.pid
+htpc:~$
+
+
+o Automatic Start
+For ZFS to live by its "zero administration" namesake, the zfs daemon must
+be loaded at startup.  A benefit to this is that it is not necessary to mount
+the zpool in /etc/fstab; the zfs daemon can import and mount zfs pools
+automatically.
+archlinux.org/
+
+Noticed that the zfs-fuse installed /etc/init.d/zfs-fuse start/stop script
+that indeed starts the /sbin/zfs-fuse daemon.
+
+
+o Inspected install zfs-fuse package:
+htpc:~# dpkg -l | grep zfs
+ii  zfs-fuse   0.7.0-8   amd64   ZFS on FUSE
+htpc:~# 
+
+zfs-fuse package installed /etc/init.d/zfs-fuse for startup.
+
+
+o Install zfs-fuse - ZFS on FUSE package:
+# aptitude install zfs-fuse
+The following NEW packages will be installed:
+  libaio1{a} zfs-fuse 
+0 packages upgraded, 2 newly installed, 0 to remove and 7 not upgraded.
+Need to get 1,266 kB of archives. After unpacking 3,208 kB will be used.
+Do you want to continue? [Y/n/?] Y
+Get: 1 http://ftp.us.debian.org/debian/ wheezy/main libaio1 amd64 0.3.109-3 [9,150 B]
+Get: 2 http://ftp.us.debian.org/debian/ wheezy/main zfs-fuse amd64 0.7.0-8 [1,257 kB]
+Fetched 1,266 kB in 5s (241 kB/s)     
+Selecting previously unselected package libaio1:amd64.
+(Reading database ... 156365 files and directories currently installed.)
+Unpacking libaio1:amd64 (from .../libaio1_0.3.109-3_amd64.deb) ...
+Selecting previously unselected package zfs-fuse.
+Unpacking zfs-fuse (from .../zfs-fuse_0.7.0-8_amd64.deb) ...
+Processing triggers for man-db ...
+Setting up libaio1:amd64 (0.3.109-3) ...
+Setting up zfs-fuse (0.7.0-8) ...
+[ ok ] Starting zfs-fuse: zfs-fuse.
+[ ok ] Immunizing zfs-fuse against OOM kills and sendsigs signals...done.
+[ ok ] Mounting ZFS filesystems...done.
+                                         
+htpc:~#
+
+
+o Inspect with blkid:
+Looks like zfs is /dev/sdc4:
+
+htpc:~# blkid
+/dev/sda1: UUID="985ace94-50a9-4be8-b4fc-870ee2308384" TYPE="ext4" 
+/dev/sda2: UUID="27b45d11-2d57-4f1c-9e15-44c774c1d69b" TYPE="ext4" 
+/dev/sdb1: UUID="4b27d4ce-adff-4ee7-b8af-0f3d6404d075" TYPE="ext4" 
+/dev/sdb2: UUID="49b21d1a-f8de-45ad-ab9c-0d862681c013" TYPE="ext4" 
+/dev/sdb3: UUID="LVAs4f-K5lf-wRTc-dGdu-Jj2H-arB0-05k7PI" TYPE="LVM2_member" 
+/dev/sda3: UUID="cp3w6c-Fg4h-qIo8-0AlO-DDlB-ZFWD-ZAUHd6" TYPE="LVM2_member" 
+/dev/mapper/htpc-videos: UUID="fb5bf7a3-541d-4d82-a9ea-0e0305e20651" TYPE="ext4" 
+/dev/mapper/htpc-vms: UUID="eaeb00b2-ad08-4262-83d0-bbe3b15e9add" TYPE="ext4" 
+/dev/sdc1: UUID="137ba80d-bd1f-4948-89e5-95b6bde40658" TYPE="ext4" 
+/dev/sdc2: UUID="1f6bf3ee-2125-410c-8ad4-8ce66a38f768" TYPE="ext4" 
+/dev/sdc3: UUID="16aaebd0-3095-4abe-a090-c38442909487" TYPE="ext4" 
+/dev/sdc4: LABEL="backups" UUID="8084782054621359640" UUID_SUB="7558005598083332404" TYPE="zfs_member" 
+htpc:~#
+
+o Inspect with 'parted -l':
+Looks good so far.
+
+htpc:~# parted -l
+Model: ATA Crucial_CT1024M5 (scsi)
+Disk /dev/sda: 1024GB
+Sector size (logical/physical): 512B/4096B
+Partition Table: msdos
+
+Number  Start   End     Size   Type     File system  Flags
+ 1      1049kB  100GB   100GB  primary  ext4
+ 2      100GB   200GB   100GB  primary  ext4         boot
+ 3      200GB   1024GB  824GB  primary               lvm
+
+
+Model: ATA Crucial_CT1024M5 (scsi)
+Disk /dev/sdb: 1024GB
+Sector size (logical/physical): 512B/4096B
+Partition Table: msdos
+
+Number  Start   End     Size   Type     File system  Flags
+ 1      1049kB  100GB   100GB  primary  ext4
+ 2      100GB   200GB   100GB  primary  ext4
+ 3      200GB   1024GB  824GB  primary               lvm
+
+
+Model: ATA ST8000AS0002-1NA (scsi)
+Disk /dev/sdc: 8002GB
+Sector size (logical/physical): 512B/4096B
+Partition Table: gpt
+
+Number  Start   End     Size    File system  Name     Flags
+ 1      1049kB  100GB   100GB   ext4         primary  boot
+ 2      100GB   200GB   100GB   ext4         primary  boot
+ 3      200GB   300GB   100GB   ext4         primary  boot
+ 4      300GB   8002GB  7702GB  zfs          primary
+
+
+Model: Linux device-mapper (linear) (dm)
+Disk /dev/mapper/htpc-videos: 1074GB
+Sector size (logical/physical): 512B/4096B
+Partition Table: loop
+
+Number  Start  End     Size    File system  Flags
+ 1      0.00B  1074GB  1074GB  ext4
+
+
+Model: Linux device-mapper (linear) (dm)
+Disk /dev/mapper/htpc-vms: 322GB
+Sector size (logical/physical): 512B/4096B
+Partition Table: loop
+
+Number  Start  End    Size   File system  Flags
+ 1      0.00B  322GB  322GB  ext4
+
+
+htpc:~# 
+
+
+o Installed parted and parted-doc:
+# aptitude install parted parted-doc
+
+o htpc:~$ dmesg | grep sd
+8TB Seagate ST8000AS0002 drive seen as /dev/sdc:
+
+[    3.245943] sd 1:0:0:0: [sda] 2000409264 512-byte logical blocks: (1.02 TB/953 GiB)
+[    3.245946] sd 1:0:0:0: [sda] 4096-byte physical blocks
+[    3.245999] sd 1:0:0:0: [sda] Write Protect is off
+[    3.246002] sd 1:0:0:0: [sda] Mode Sense: 00 3a 00 00
+[    3.246017] sd 1:0:0:0: [sda] Write cache: enabled, read cache: enabled, doesn't support DPO or FUA
+[    3.246105] sd 2:0:0:0: [sdb] 2000409264 512-byte logical blocks: (1.02 TB/953 GiB)
+[    3.246107] sd 2:0:0:0: [sdb] 4096-byte physical blocks
+[    3.246161] sd 2:0:0:0: [sdb] Write Protect is off
+[    3.246163] sd 2:0:0:0: [sdb] Mode Sense: 00 3a 00 00
+[    3.246181] sd 2:0:0:0: [sdb] Write cache: enabled, read cache: enabled, doesn't support DPO or FUA
+[    3.246387] sd 3:0:0:0: [sdc] 15628053168 512-byte logical blocks: (8.00 TB/7.27 TiB)
+[    3.246389] sd 3:0:0:0: [sdc] 4096-byte physical blocks
+[    3.246427] sd 3:0:0:0: [sdc] Write Protect is off
+[    3.246429] sd 3:0:0:0: [sdc] Mode Sense: 00 3a 00 00
+[    3.246446] sd 3:0:0:0: [sdc] Write cache: enabled, read cache: enabled, doesn't support DPO or FUA
+[    3.246669]  sda: sda1 sda2 sda3
+[    3.246691]  sdb: sdb1 sdb2 sdb3
+[    3.246929] sd 1:0:0:0: [sda] Attached SCSI disk
+[    3.247047] sd 2:0:0:0: [sdb] Attached SCSI disk
+[    3.248491] sd 1:0:0:0: Attached scsi generic sg0 type 0
+[    3.248529] sd 2:0:0:0: Attached scsi generic sg1 type 0
+[    3.248569] sd 3:0:0:0: Attached scsi generic sg2 type 0
+[    3.299250]  sdc: sdc1 sdc2 sdc3 sdc4
+[    3.299656] sd 3:0:0:0: [sdc] Attached SCSI disk
+[    4.008518] EXT4-fs (sda2): mounted filesystem with ordered data mode. Opts: (null)
+[    5.401235] EXT4-fs (sda2): re-mounted. Opts: (null)
+[    5.447507] EXT4-fs (sda2): re-mounted. Opts: errors=remount-ro
+[    6.650397] Installing knfsd (copyright (C) 1996 okir@monad.swb.de).
+htpc:~$ 
+
+
+o Installed 8TB Seagate drive in htpc (not screwed down).
+
+
+Links
+=====
+ZFS - archlinux
+https://wiki.archlinux.org/index.php/ZFS
