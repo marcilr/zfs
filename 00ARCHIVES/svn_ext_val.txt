@@ -1,0 +1,13 @@
+#
+# svn_ext_val.txt
+# Created Mon Jul 20 19:12:48 AKDT 2015
+# by Raymond E. Marcil <marcilr@gmail.com>
+#
+
+
+#
+# List of repo hierarchical directories to checkout under zfs/
+#
+# syntax/
+#
+../../zfs/syntax/syntax   ./syntax
