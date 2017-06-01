@@ -23,9 +23,11 @@ links.txt
 packages.txt
   ZFS related packages
 
+raid-z/
+  ZFS redundant disk
+
 TODO
   Items TODO
 
 zfs.txt
   ZFS - Zettabyte File System
-
