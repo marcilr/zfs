@@ -1,0 +1,138 @@
+raid-z.txt
+Created Thu Jun  1 12:55:11 AKDT 2017
+Copyright (C) 2017 by Raymond E. Marcil <marcilr@gmail.com>
+
+
+RAID-Z
+
+
+Disks fail.  One method of avoiding data loss from disk failure is to
+implement RAID.  ZFS supports this feature in its pool design.  RAID-Z
+pools require three or more disks but provide more usable space than
+mirrored pools.
+--freebsd.org/doc/handbook/zfs-quickstart.html
+
+
+Sections
+========
+o Performance, capacity and data integrity
+o What are the advantages and disadvantages of each raid type ?
+o Quick Summery: ZFS Speeds and Capacity
+o Links
+
+
+Performance, capacity and data integrity
+========================================
+        Raids have three main advantages over using a single disk.
+               Performance, capacity and data integrity.
+
+                               capacity
+                                  /\
+                                 /  \
+                                /    \
+                               /      \ 
+                  performance /________\ integrity
+
+--calomel.org/zfs_raid_speed_capacity.html
+
+
+What are the advantages and disadvantages of each raid type ?
+=============================================================
+raid0 or striping array has no redundancy, but provides the best performance
+  and additional storage.  Any drive failure destroys the entire array so
+  raid 0 is not safe at all.  if you need really fast scratch space for
+  videoediting then raid0 does well.
+
+raid1 or mirroring simply mirrors the same data over every drive in the
+  array.  This is excellent redundancy as you can lose every drive except
+  one and still have access to the data.  A positive is the raid read
+  speed is increased by every drive added to the array.  The big negative
+  is low capacity and slow write speed speeds.  No matter how many drives
+  are in the raid you have the total capacity of a single drive to use.
+  Speed is reduced because every drive gets a complete copy of the same
+  files.  Mirroring is normally used for two(2) drives, not for 12 and
+  24 like in our tests due to the incredible amount of wasted space.
+
+raid 2, raid 3 and raid 4 are not tested as they are no longer used by the
+  IT industry.  Raid2 uses an equal amount of disks as dedicated ECC drives.
+  Raid 3 and 4 use a single dedicated parity drive.  None of these raids are
+  used in production anymore due to horrible random read and write
+  performance.
+
+raid5 or raidz distributes parity along with the data and can lose one
+  physical drive before a raid failure.  Because parity needs to be
+  calculated raid 5 is slower then raid0, but raid 5 is much safer.
+  RAID 5 requires at least three hard disks in which one(1) full disk of
+  space is used for parity.
+
+raid6 or raidz2 distributes parity along with the data and can lose two
+  physical drives instead of just one like raid 5.  Because more parity
+  needs to be calculated raid 6 is slower then raid5, but raid6 is safer.
+  raidz2 requires at least four disks and will use two(2) disks of space
+  for parity.
+
+raid7 or raidz3 distributes parity just like raid 5 and 6, but raid7 can
+  lose three physical drives.  Since triple parity needs to be calculated
+  raid 7 is slower then raid5 and raid 6, but raid 7 is the safest of the
+  three.  raidz3 requires at least four, but should be used with no less
+  then five(5) disks, of which three(3) disks of space are used for parity.
+
+raid10 or raid1+0 is mirroring and striping of data.  The simplest raid10
+  array has four disks and consists of two pairs of mirrors.  Disk 1 and 2
+  are mirrors and separately disk 3 and 4 are another mirror.  Data is then
+  striped (think raid0) across both mirrors.  You can lose one drive in each
+  mirror and the data is still safe.  You can not lose both drives which make
+  up one mirror, for example drives 1 and 2 can not be lost at the same time.
+  Raid 10 's advantage is reading data is fast.  The disadvantages are the
+  writes are slow (multiple mirrors) and capacity is low.
+
+raid60 or raid6+0 is a stripe of two or more raid6 volumes. You get the
+  advantage of raid6 safety (lose two drives per raid6 array) and of raid0
+  striping read speeds. The negatives are the same as raid10.
+
+raid70 or raid7+0 is a stripe of two or more raid7 volumes.  Just like raid6,
+  you take advantage of raid7 safety and raid0 striping read speeds, but lose
+  capacity.
+
+--calomel.org/zfs_raid_speed_capacity.html
+
+
+Quick Summery: ZFS Speeds and Capacity
+======================================
+The following table shows a summery of all the tests and lists the number of
+disks, raid types, capacity and performance metrics for easy comparison.
+The speeds display "w" for write, "rw" for rewrite and "r" for read and
+throughput is in megabytes per second.
+
+ZFS uses variable-sized blocks of up to 1024 kilobytes.  If data compression
+(LZJB or LZ4) is enabled, variable block sizes are used.  If a block can be
+compressed to fit into a smaller block size, the smaller size is used on the
+disk to use less storage and improve IO throughput at the cost of increased
+CPU use for the compression and decompression operations.  Take a look at our
+compression study further down this page.
+
+When building a RAID it is common practice to use the "power of two plus
+parity" raid infrastructure to maximize parity striping, speed and well as
+capacity.  When using ZFS the standard RAID rules may not apply, especially
+when LZ4 compression is active.  ZFS can vary the size of the stripes on each
+disk and compression can make those stripes unpredictable.  The current rule
+of thumb when making a ZFS raid is:
+
+o MIRROR (raid1) used with two(2) to four(4) disks or more.
+o RAIDZ-1 (raid5) used with five(5) disks or more.
+o RAIDZ-2 (raid6) used with six(6) disk or more.
+o RAIDZ-3 (raid7) used with eleven(11) disks or more.
+
+calomel.org/zfs_raid_speed_capacity.html
+
+
+Links
+=====
+The Z File System (ZFS)
+Quick Start Guide
+https://www.freebsd.org/doc/handbook/zfs-quickstart.html
+
+ZFS Raidz Performance, Capacity and Integrity
+comparing speed, space and safety per raidz type
+Truly great RAID-Z details here
+https://calomel.org/zfs_raid_speed_capacity.html
