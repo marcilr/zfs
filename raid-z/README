@@ -1,0 +1,18 @@
+README
+Created Thu Jun  1 13:09:05 AKDT 2017
+Copyright (C) 2017 by Raymond E. Marcil <marcilr@gmail.com>
+
+
+Filelist
+========
+links.txt
+  RAID-Z related links
+
+raid-z.txt
+  RAID-Z
+  Disks fail.  One method of avoiding data loss from disk failure is to
+  implement RAID.  ZFS supports this feature in its pool design.  RAID-Z
+  pools require three or more disks but provide more usable space than
+  mirrored pools.
+  --freebsd.org/doc/handbook/zfs-quickstart.html
+
