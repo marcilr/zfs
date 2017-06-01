@@ -8,5 +8,8 @@ ZFS - Zettabyte File System
 
 Filelist
 ========
+00INSTALL/
+  Installation of zfs
+
 deduplication
   Deduplication
