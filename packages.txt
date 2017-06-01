@@ -1,0 +1,27 @@
+packages.txt
+Created Sun Jul 19 08:44:46 AKDT 2015
+Copyright (C) 2015 by Raymond E. Marcil <marcilr@gmail.com>
+
+
+ZFS related packages
+
+
+Debian jessie 8.1 amd64 has:
+  libguestfs-zfs - guest disk image management system - ZFS support
+  parted - disk partition manipulator
+  simplesnap - Simple and powerful network transmission of ZFS snapshots
+  zfs-fuse - ZFS on FUSE
+  zfsnap - Automatic snapshot creation and removal for ZFS
+
+
+Sat Sep 26 10:04:00 AKDT 2015
+=============================
+Installed on malachite debian jessie 8.2:
+  parted - disk partition manipulator
+  parted-doc - disk partition manipulator - documentation  
+  zfs-fuse - ZFS on FUSE
+
+Not installed:
+  libguestfs-zfs - guest disk image management system - ZFS support
+  simplesnap - Simple and powerful network transmission of ZFS snapshots
+  zfsnap - Automatic snapshot creation and removal for ZFS
