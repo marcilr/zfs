@@ -1,0 +1,25 @@
+zpool.txt
+Created Mon Jul 20 19:14:57 AKDT 2015
+Copyright (C) 2015 by Raymond E. Marcil <marcilr@gmail.com>
+
+
+zpool - configures ZFS storage pools
+
+
+
+
+Destroy tank
+============
+# zpool destroy tank
+cannot destroy 'tank': pool is faulted
+use '-f' to force destruction anyway
+# zpool destroy -f tank
+
+oracle.com/
+
+
+Links
+=====
+Destroying ZFS Storage Pools
+Oracle Solaris ZFS Administration Guide
+http://docs.oracle.com/cd/E19253-01/819-5461/gammr/index.html
