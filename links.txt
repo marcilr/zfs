@@ -35,6 +35,9 @@ ZFS on Linux (ZoL) is stable and is ready to handle
 many of the workloads ZFS handles on other platforms.
 http://clusterhq.com/blog/state-zfs-on-linux/
 
+The ZFS ZIL and SLOG Demystified
+http://www.freenas.org/blog/zfs-zil-and-slog-demystified/
+
 ZFS
 From Wikipedia, the free encyclopedia
 http://en.wikipedia.org/wiki/ZFS
