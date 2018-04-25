@@ -55,8 +55,16 @@ Great detail on deduplication theory here.
 Solid info on byte-level, block-level, and file-level.
 https://blogs.oracle.com/bonwick/entry/zfs_dedup
 
+ZFS Is the Best Filesystem (For Now...)
+July 10, 2017 By Stephen 48 Comments
+http://blog.fosketts.net/2017/07/10/zfs-best-filesystem-now/
+
 ZFS on linux
 http://zfsonlinux.org/faq.html
+
+ZFS on Linux
+by Andy Botting
+http://www.andybotting.com/zfs-on-linux
 
 ZFS FAQ
 http://zfsonlinux.org/faq.html
