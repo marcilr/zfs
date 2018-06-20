@@ -50,6 +50,10 @@ http://www.theregister.co.uk/2012/10/12/greenbytes_chairman/
 it cheaply to all comers". The Register. Retrieved August 29, 2013.
 http://www.theregister.co.uk/2012/06/01/tegile_zebi/
 
+How to Determine Memory Requirements for ZFS Deduplication
+by Dominic Kay (updated by Cindy Swearingen)
+http://www.oracle.com/technetwork/articles/servers-storage-admin/o11-113-size-zfs-dedup-1354231.html
+
 2.13 Deduplication
 ZFS
 From Wikipedia, the free encyclopedia
